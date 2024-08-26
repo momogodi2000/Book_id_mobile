@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MakePaymentPage extends StatefulWidget {
+  const MakePaymentPage({super.key});
+
   @override
   _MakePaymentPageState createState() => _MakePaymentPageState();
 }
@@ -9,10 +11,10 @@ class _MakePaymentPageState extends State<MakePaymentPage>
     with SingleTickerProviderStateMixin {
   String? _selectedPaymentMethod; // To store the selected payment method
   final _formKey = GlobalKey<FormState>(); // Key for the form
-  TextEditingController _mobileController = TextEditingController();
-  TextEditingController _bankNameController = TextEditingController();
-  TextEditingController _accountNumberController = TextEditingController();
-  TextEditingController _routingNumberController = TextEditingController();
+  final TextEditingController _mobileController = TextEditingController();
+  final TextEditingController _bankNameController = TextEditingController();
+  final TextEditingController _accountNumberController = TextEditingController();
+  final TextEditingController _routingNumberController = TextEditingController();
   AnimationController? _animationController;
   Animation<double>? _fadeAnimation;
 
@@ -43,7 +45,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
   void _submitPayment() {
     if (_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Payment submitted successfully!"),
         ),
       );
@@ -57,7 +59,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Make Payment"),
+        title: const Text("Make Payment"),
       ),
       body: FadeTransition(
         opacity: _fadeAnimation!,
@@ -66,7 +68,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 "Choose a Payment Method",
                 style: TextStyle(
                   fontSize: 24.0,
@@ -75,7 +77,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
               ),
               const SizedBox(height: 20.0),
               ListTile(
-                title: Text("Mobile Payment"),
+                title: const Text("Mobile Payment"),
                 leading: Radio<String>(
                   value: "mobile",
                   groupValue: _selectedPaymentMethod,
@@ -87,7 +89,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
                 ),
               ),
               ListTile(
-                title: Text("PayPal Payment"),
+                title: const Text("PayPal Payment"),
                 leading: Radio<String>(
                   value: "paypal",
                   groupValue: _selectedPaymentMethod,
@@ -115,7 +117,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
               Center(
                 child: ElevatedButton(
                   onPressed: _submitPayment,
-                  child: Text("Submit Payment"),
+                  child: const Text("Submit Payment"),
                 ),
               ),
             ],
@@ -132,7 +134,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             "Mobile Payment",
             style: TextStyle(
               fontSize: 20.0,
@@ -143,7 +145,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
           TextFormField(
             controller: _mobileController,
             keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Mobile Phone Number",
               border: OutlineInputBorder(),
             ),
@@ -169,7 +171,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             "PayPal Payment",
             style: TextStyle(
               fontSize: 20.0,
@@ -179,7 +181,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
           const SizedBox(height: 20.0),
           TextFormField(
             controller: _bankNameController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Bank Name",
               border: OutlineInputBorder(),
             ),
@@ -194,7 +196,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
           TextFormField(
             controller: _accountNumberController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Account Number",
               border: OutlineInputBorder(),
             ),
@@ -212,7 +214,7 @@ class _MakePaymentPageState extends State<MakePaymentPage>
           TextFormField(
             controller: _routingNumberController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Routing Number",
               border: OutlineInputBorder(),
             ),

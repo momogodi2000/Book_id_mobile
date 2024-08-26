@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../panel/police/communication/add_com.dart';
+import '../panel/police/contact/contact_us_management.dart';
+import '../panel/police/manage_appointment/validation.dart';
+import '../panel/police/manage_missing/ViewIdCardsPage.dart';
 
 class PoliceHeaderPage extends StatelessWidget implements PreferredSizeWidget {
   const PoliceHeaderPage({super.key});
@@ -156,7 +159,7 @@ class PoliceDashboardDrawer extends StatelessWidget {
     return Drawer(
       child: Column(
         children: [
-          DrawerHeader(
+          const DrawerHeader(
             decoration: BoxDecoration(
               color: Colors.blueGrey,
             ),
@@ -179,8 +182,21 @@ class PoliceDashboardDrawer extends StatelessWidget {
                   icon: Icons.event_available,
                   text: 'Manage Appointments',
                   onTap: () {
-                    // Handle manage appointments
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) =>  ValidationPage()),
+                    );
                   },
+                ),
+                _createDrawerItem(
+                  icon: Icons.event_available,
+                  text: 'Manage Missing_id Card',
+                  onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ViewIdCardsPage()),
+                  );
+                },
                 ),
                 _createDrawerItem(
                   icon: Icons.person_search,
@@ -190,12 +206,16 @@ class PoliceDashboardDrawer extends StatelessWidget {
                   },
                 ),
                 _createDrawerItem(
-                  icon: Icons.notifications,
-                  text: 'Notifications',
+                  icon: Icons.contact_mail,
+                  text: 'Manger_contact_us',
                   onTap: () {
-                    // Handle notifications
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ContactUsManagementPage()),
+                    );
                   },
                 ),
+
                 _createDrawerItem(
                   icon: Icons.settings,
                   text: 'Settings',
@@ -220,7 +240,7 @@ class PoliceDashboardDrawer extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => AddComPage()),
+                          MaterialPageRoute(builder: (context) => const AddComPage()),
                         );
                       },
                     ),
@@ -283,9 +303,9 @@ class PoliceMainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const PoliceHeaderPage(),
-      drawer: const PoliceDashboardDrawer(),
+    return const Scaffold(
+      appBar: PoliceHeaderPage(),
+      drawer: PoliceDashboardDrawer(),
       body: Center(
         child: Text('Police Dashboard Main Content Area'),
       ),

@@ -198,7 +198,7 @@ class _UploadIDPageState extends State<UploadIDPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Select Image of ID Card',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),

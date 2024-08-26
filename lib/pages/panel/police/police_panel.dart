@@ -8,12 +8,12 @@ class PolicePanelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const PoliceHeaderPage(), // Using the imported PoliceHeaderPage
-      drawer: const PoliceDashboardDrawer(), // Using the imported PoliceDashboardDrawer
+    return const Scaffold(
+      appBar: PoliceHeaderPage(), // Using the imported PoliceHeaderPage
+      drawer: PoliceDashboardDrawer(), // Using the imported PoliceDashboardDrawer
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -25,7 +25,7 @@ class PolicePanelPage extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               Text(
                 'This is the main area where you can manage all police-related tasks. '
                     'Use the drawer to navigate through different sections such as managing appointments, '
@@ -42,7 +42,7 @@ class PolicePanelPage extends StatelessWidget {
 }
 
 void main() {
-  runApp(MaterialApp(
-    home: const PolicePanelPage(),
+  runApp(const MaterialApp(
+    home: PolicePanelPage(),
   ));
 }

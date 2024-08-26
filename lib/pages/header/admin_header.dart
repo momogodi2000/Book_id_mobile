@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../panel/admin/about_us/about_us.dart';
+import '../panel/admin/crud_user/view_user.dart';
+
 class HeaderPage extends StatelessWidget implements PreferredSizeWidget {
   const HeaderPage({super.key});
 
@@ -154,7 +157,7 @@ class AdminDashboardDrawer extends StatelessWidget {
     return Drawer(
       child: Column(
         children: [
-          DrawerHeader(
+          const DrawerHeader(
             decoration: BoxDecoration(
               color: Colors.blueAccent,
             ),
@@ -177,7 +180,10 @@ class AdminDashboardDrawer extends StatelessWidget {
                   icon: Icons.group,
                   text: 'Manage Users',
                   onTap: () {
-                    // Handle manage users
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const UserListPage()),
+                    );
                   },
                 ),
                 _createDrawerItem(
@@ -198,7 +204,10 @@ class AdminDashboardDrawer extends StatelessWidget {
                   icon: Icons.info_outline,
                   text: 'About Us',
                   onTap: () {
-                    // Handle about us
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AboutPage()),
+                    );
                   },
                 ),
                 _createDrawerItem(
@@ -238,9 +247,9 @@ class MainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const HeaderPage(),
-      drawer: const AdminDashboardDrawer(),
+    return const Scaffold(
+      appBar: HeaderPage(),
+      drawer: AdminDashboardDrawer(),
       body: Center(
         child: Text('Main Content Area'),
       ),

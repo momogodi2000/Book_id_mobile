@@ -53,13 +53,13 @@ class TrackPage extends StatelessWidget {
   }
 
   Widget _buildTrackForm(double screenWidth, double screenHeight, BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
     String identificationNumber = '';
     String name = '';
     DateTime selectedDate = DateTime.now();
 
     return Form(
-      key: _formKey,
+      key: formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -107,7 +107,7 @@ class TrackPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               suffixIcon: IconButton(
-                icon: Icon(Icons.calendar_today),
+                icon: const Icon(Icons.calendar_today),
                 onPressed: () async {
                   final DateTime? picked = await showDatePicker(
                     context: context,
@@ -126,8 +126,8 @@ class TrackPage extends StatelessWidget {
           Center(
             child: ElevatedButton(
               onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
+                if (formKey.currentState!.validate()) {
+                  formKey.currentState!.save();
                   _checkStatus(context, identificationNumber, name, selectedDate);
                 }
               },

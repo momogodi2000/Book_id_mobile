@@ -3,6 +3,8 @@ import 'package:intl/intl.dart'; // For formatting the date
 import 'package:table_calendar/table_calendar.dart'; // For the calendar widget
 
 class BookAppointmentPage extends StatefulWidget {
+  const BookAppointmentPage({super.key});
+
   @override
   _BookAppointmentPageState createState() => _BookAppointmentPageState();
 }
@@ -70,7 +72,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 "Select a Date for National ID Booking",
                 style: TextStyle(
                   fontSize: 24.0,
@@ -103,12 +105,12 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
                     color: Colors.grey.shade300,
                     shape: BoxShape.circle,
                   ),
-                  markerDecoration: BoxDecoration(
+                  markerDecoration: const BoxDecoration(
                     color: Colors.blueAccent,
                     shape: BoxShape.circle,
                   ),
                 ),
-                headerStyle: HeaderStyle(
+                headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
                   titleCentered: true,
                   titleTextStyle: TextStyle(
@@ -123,12 +125,12 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
                   onPressed: _submitBooking,
                   child: Text(
                     "Book for ${_formatDate(_selectedDate)}",
-                    style: TextStyle(fontSize: 16.0),
+                    style: const TextStyle(fontSize: 16.0),
                   ),
                 ),
               ),
               const SizedBox(height: 20.0),
-              Expanded(
+              const Expanded(
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Text(

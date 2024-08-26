@@ -166,13 +166,13 @@ class ClientDashboardDrawer extends StatelessWidget {
     return Drawer(
       child: Column(
         children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(
+          const DrawerHeader(
+            decoration: BoxDecoration(
               color: Colors.blue,
             ),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: const Text(
+              child: Text(
                 'Client Dashboard',
                 style: TextStyle(
                   color: Colors.white,
@@ -199,7 +199,7 @@ class ClientDashboardDrawer extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => UploadDocPage()),
+                          MaterialPageRoute(builder: (context) => const UploadDocPage()),
                         );
                       },
                     ),
@@ -209,7 +209,7 @@ class ClientDashboardDrawer extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => BookAppointmentPage()),
+                          MaterialPageRoute(builder: (context) => const BookAppointmentPage()),
                         );
                       },
                     ),
@@ -219,7 +219,7 @@ class ClientDashboardDrawer extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => MakePaymentPage()),
+                          MaterialPageRoute(builder: (context) => const MakePaymentPage()),
                         );
                       },
                     ),

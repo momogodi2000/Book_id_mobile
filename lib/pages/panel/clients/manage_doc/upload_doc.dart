@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class UploadDocPage extends StatefulWidget {
+  const UploadDocPage({super.key});
+
   @override
   _UploadDocPageState createState() => _UploadDocPageState();
 }

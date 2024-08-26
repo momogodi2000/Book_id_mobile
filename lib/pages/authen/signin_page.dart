@@ -213,7 +213,7 @@ class _SigninPageState extends State<SigninPage> with SingleTickerProviderStateM
                               const SizedBox(height: 8),
                               Row(
                                 children: <Widget>[
-                                  Expanded(
+                                  const Expanded(
                                     child: Text(
                                       "Don't have an account?",
                                       textAlign: TextAlign.end,

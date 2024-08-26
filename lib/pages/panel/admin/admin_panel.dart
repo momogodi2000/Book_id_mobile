@@ -6,9 +6,9 @@ class AdminPanelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const HeaderPage(), // Using the imported HeaderPage
-      drawer: const AdminDashboardDrawer(), // Using the imported AdminDashboardDrawer
+    return const Scaffold(
+      appBar: HeaderPage(), // Using the imported HeaderPage
+      drawer: AdminDashboardDrawer(), // Using the imported AdminDashboardDrawer
       body: Center(
         child: Text(
           'Welcome to the Admin Panel',
@@ -24,7 +24,7 @@ class AdminPanelPage extends StatelessWidget {
 }
 
 void main() {
-  runApp(MaterialApp(
-    home: const AdminPanelPage(),
+  runApp(const MaterialApp(
+    home: AdminPanelPage(),
   ));
 }

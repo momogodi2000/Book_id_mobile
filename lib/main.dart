@@ -2,13 +2,14 @@ import 'package:cni/pages/panel/clients/clients_panel.dart';
 import 'package:cni/pages/panel/admin/admin_panel.dart';
 import 'package:cni/pages/panel/police/police_panel.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/police',
+      initialRoute: '/admin',
       routes: {
         '/admin': (context) => const AdminPanelPage(),
         '/clients': (context) => const ClientsPanel(),
@@ -29,11 +30,13 @@ class MyApp extends StatelessWidget {
 
 
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Main Panel'),
+        title: const Text('Main Panel'),
       ),
       body: Center(
         child: Column(
@@ -43,19 +46,19 @@ class HomePage extends StatelessWidget {
               onPressed: () {
                 Navigator.pushNamed(context, '/admin');
               },
-              child: Text('Go to Admin Panel'),
+              child: const Text('Go to Admin Panel'),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/clients');
               },
-              child: Text('Go to Clients Panel'),
+              child: const Text('Go to Clients Panel'),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/police');
               },
-              child: Text('Go to Police Panel'),
+              child: const Text('Go to Police Panel'),
             ),
           ],
         ),

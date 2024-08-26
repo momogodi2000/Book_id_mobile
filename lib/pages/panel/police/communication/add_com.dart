@@ -65,8 +65,8 @@ class AddComPage extends StatelessWidget {
             },
           );
         },
-        child: const Icon(Icons.add),
         backgroundColor: Colors.blueAccent,
+        child: const Icon(Icons.add),
       ),
     );
   }

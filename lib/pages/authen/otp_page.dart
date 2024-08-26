@@ -15,7 +15,9 @@ class _OTPPageState extends State<OTPPage> {
 
   @override
   void dispose() {
-    _otpControllers.forEach((controller) => controller.dispose());
+    for (var controller in _otpControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 

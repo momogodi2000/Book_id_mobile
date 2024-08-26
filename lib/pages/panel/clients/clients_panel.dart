@@ -6,12 +6,12 @@ class ClientsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const ClientHeaderPage(), // Using the imported ClientHeaderPage
-      drawer: const ClientDashboardDrawer(), // Using the imported ClientDashboardDrawer
+    return const Scaffold(
+      appBar: ClientHeaderPage(), // Using the imported ClientHeaderPage
+      drawer: ClientDashboardDrawer(), // Using the imported ClientDashboardDrawer
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(16.0),
           child: Text(
             'Welcome to the Clients Panel!',
             style: TextStyle(
@@ -28,7 +28,7 @@ class ClientsPanel extends StatelessWidget {
 }
 
 void main() {
-  runApp(MaterialApp(
-    home: const ClientsPanel(),
+  runApp(const MaterialApp(
+    home: ClientsPanel(),
   ));
 }
