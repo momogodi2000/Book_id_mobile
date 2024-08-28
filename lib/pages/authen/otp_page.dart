@@ -1,3 +1,5 @@
+// lib/auth/otp_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/auth_provider.dart';
@@ -24,7 +26,7 @@ class _OTPPageState extends State<OTPPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200], // Light background color
+      backgroundColor: Colors.grey[200],
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -34,7 +36,7 @@ class _OTPPageState extends State<OTPPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Image.asset(
-                  'assets/images/auth.jpeg', // Replace with your image path
+                  'assets/images/auth.jpeg',
                   height: 100,
                   width: 100,
                 ),
@@ -99,15 +101,22 @@ class _OTPPageState extends State<OTPPage> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               String otp = _otpControllers.map((controller) => controller.text).join();
-                              Provider.of<AuthProvider>(context, listen: false).verifyOTP(otp);
-                              // Handle OTP verification
+                              try {
+                                await Provider.of<AuthProvider>(context, listen: false).verifyOTP(otp);
+                                // Optionally navigate or show success message
+                              } catch (error) {
+                                // Handle error (show message to user)
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('OTP verification failed: $error')),
+                                );
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue, // Button color
+                            backgroundColor: Colors.blue,
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.0),

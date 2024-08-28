@@ -16,18 +16,18 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   String _email = '';
   String _newPassword = '';
   String _confirmPassword = '';
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200], // Light background color
+      backgroundColor: Colors.grey[200],
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Image.asset(
                   'assets/images/auth.jpeg',
@@ -119,24 +119,32 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {
+                                onPressed: _isLoading
+                                    ? null
+                                    : () async {
                                   if (_formKey.currentState!.validate()) {
                                     _formKey.currentState!.save();
-                                    Provider.of<AuthProvider>(context, listen: false).resetPassword(
-                                      _email,
-                                      _newPassword,
-                                    );
-                                    // Handle reset password
+                                    setState(() {
+                                      _isLoading = true;
+                                    });
+                                    await Provider.of<AuthProvider>(context, listen: false)
+                                        .resetPassword(_email, _newPassword);
+                                    setState(() {
+                                      _isLoading = false;
+                                    });
+                                    // Optionally show a success message or navigate away
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue, // Button color
+                                  backgroundColor: Colors.blue,
                                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                 ),
-                                child: const Text('Reset Password', style: TextStyle(fontSize: 18.0)),
+                                child: _isLoading
+                                    ? CircularProgressIndicator()
+                                    : const Text('Reset Password', style: TextStyle(fontSize: 18.0)),
                               ),
                             ),
                           ],

@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cni/pages/panel/clients/missing_doc/find_id.dart';
+import 'package:provider/provider.dart';
+import '../../provider/ThemeNotifier.dart';
 import '../panel/clients/abouts_us/abouts_us.dart';
 import '../panel/clients/communication/view_com.dart';
 import '../panel/clients/contact_us/contact_us.dart';
+import '../panel/clients/history/history.dart';
 import '../panel/clients/manage_doc/book_appointment.dart';
 import '../panel/clients/manage_doc/payment.dart';
 import '../panel/clients/manage_doc/upload_doc.dart';
 import '../panel/clients/missing_doc/upload_id.dart';
+import '../panel/clients/setting/LanguageSelectionPage.dart';
 import '../panel/clients/setting/call_center.dart';
+import '../panel/clients/setting/color.dart';
+import '../panel/clients/setting/logout.dart';
+import '../panel/clients/setting/profile.dart';
+import '../panel/clients/setting/support.dart';
 import '../panel/clients/track/track.dart';
 
 class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
@@ -50,31 +58,41 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
                         ListTile(
                           leading: const Icon(Icons.person),
                           title: const Text('Profile'),
+
                           onTap: () {
-                            Navigator.of(context).pop(); // Close the dialog first
-                            // Navigate to ProfilePage
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ProfilePage()),
+                            );
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.settings),
-                          title: const Text('Settings'),
-                          onTap: () {
-                            // Handle Settings
-                          },
+                          leading: const Icon(Icons.language),
+                          title: const Text('language'), onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LanguageSelectionPage()),
+                          );
+                        },
                         ),
                         ListTile(
                           leading: const Icon(Icons.support_agent),
                           title: const Text('Support'),
                           onTap: () {
-                            Navigator.of(context).pop(); // Close the dialog first
-                            // Navigate to SupportPage
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const SupportPage()),
+                            );
                           },
                         ),
                         ListTile(
                           leading: const Icon(Icons.logout),
                           title: const Text('Log Out'),
                           onTap: () {
-                            // Handle Logout
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const LogoutPage()),
+                            );
                           },
                         ),
                       ],
@@ -106,28 +124,34 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.brightness_2, color: Colors.black),
+                          leading: Icon(Icons.brightness_2, color: AppColors.darkThemeColor),
                           title: const Text('Dark'),
                           onTap: () {
-                            // Handle dark theme selection
+                            final themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
+                            themeNotifier.setDarkTheme(); // Or setLightTheme(), setDefaultTheme() as needed
                             Navigator.of(context).pop();
                           },
+
                         ),
                         ListTile(
-                          leading: const Icon(Icons.brightness_7, color: Colors.black),
+                          leading: Icon(Icons.brightness_7, color: AppColors.lightThemeColor),
                           title: const Text('Light'),
                           onTap: () {
-                            // Handle light theme selection
+                            final themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
+                            themeNotifier.setLightTheme(); // Or setLightTheme(), setDefaultTheme() as needed
                             Navigator.of(context).pop();
                           },
+
                         ),
                         ListTile(
-                          leading: const Icon(Icons.settings_brightness, color: Colors.black),
+                          leading: Icon(Icons.settings_brightness, color: AppColors.defaultThemeColor),
                           title: const Text('Default'),
                           onTap: () {
-                            // Handle default theme selection
+                            final themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
+                            themeNotifier.setDefaultTheme(); // Or setLightTheme(), setDefaultTheme() as needed
                             Navigator.of(context).pop();
                           },
+
                         ),
                       ],
                     ),
@@ -141,7 +165,7 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ],
                 );
-              },
+                },
             );
           },
         ),
@@ -235,13 +259,6 @@ class ClientDashboardDrawer extends StatelessWidget {
                     );
                   },
                 ),
-                _createDrawerItem(
-                  icon: Icons.settings,
-                  text: 'Settings',
-                  onTap: () {
-                    // Handle settings
-                  },
-                ),
                 _createDrawerItemWithDropdown(
                   icon: Icons.person_search,
                   text: 'Missing CNI',
@@ -305,6 +322,16 @@ class ClientDashboardDrawer extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const CallCenterPage()),
+                    );
+                  },
+                ),
+                _createDrawerItem(
+                  icon: Icons.history,
+                  text: 'Why having Id Card?',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) =>  HistoryPage()),
                     );
                   },
                 ),

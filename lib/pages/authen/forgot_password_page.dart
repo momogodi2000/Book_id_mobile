@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../provider/auth_provider.dart';
+import '../../Services/auth_services.dart';  // Make sure to import your Authservices
 import 'signin_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -40,7 +40,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey[50], // Background color
+      backgroundColor: Colors.blueGrey[50],
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
@@ -131,11 +131,20 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                           ),
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               _formKey.currentState!.save();
-                              Provider.of<AuthProvider>(context, listen: false).forgotPassword(_email);
-                              // Handle forgot password
+                              try {
+                                await Provider.of<Authservices>(context, listen: false)
+                                    .forgotPassword(_email);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Password reset email sent!')),
+                                );
+                              } catch (error) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(error.toString())),
+                                );
+                              }
                             }
                           },
                           child: const Text('Reset Password', style: TextStyle(fontSize: 18)),

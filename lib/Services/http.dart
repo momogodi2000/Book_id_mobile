@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class Http {
-  static const String _baseUrl = 'https://your-django-api.com/api/'; // replace with your API URL
+  static const String _baseUrl = 'http://127.0.0.1:8000/api/'; // replace with your API URL
 
   static Future<http.Response> get(String endpoint) async {
     final url = Uri.parse(_baseUrl + endpoint);

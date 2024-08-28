@@ -22,6 +22,10 @@ class ContactUsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Center(
+                child: _buildAnimatedContactImage(screenWidth),
+              ),
+              SizedBox(height: screenHeight * 0.03),
               const Text(
                 'We would love to hear from you!',
                 style: TextStyle(
@@ -29,6 +33,13 @@ class ContactUsPage extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: Colors.blueAccent,
                 ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              const Text(
+                'If you have any questions or need clarification, just leave a message and we will reply to you promptly.',
+                style: TextStyle(fontSize: 16, height: 1.5),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: screenHeight * 0.03),
               _buildTextField(
@@ -69,10 +80,6 @@ class ContactUsPage extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: screenHeight * 0.05),
-              Center(
-                child: _buildAnimatedContactImage(screenWidth),
-              ),
             ],
           ),
         ),
@@ -104,11 +111,14 @@ class ContactUsPage extends StatelessWidget {
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(seconds: 2),
       builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Image.asset(
-            'assets/icons/logo1.ico', // Add your image asset here
-            width: screenWidth * 0.5,
+        return Transform.scale(
+          scale: value,
+          child: Opacity(
+            opacity: value,
+            child: Image.asset(
+              'assets/icons/logo1.ico', // Add your image asset here
+              width: screenWidth * 0.5,
+            ),
           ),
         );
       },

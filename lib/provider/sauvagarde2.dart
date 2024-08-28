@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:cni/pages/SplashScreen.dart';
-import 'package:cni/provider/ThemeNotifier.dart';  // Import ThemeNotifier for managing themes
-import 'Services/auth_services.dart';  // Import Authservices
+import 'package:cni/provider/ThemeNotifier.dart';  // Import the ThemeNotifier
+import 'package:cni/pages/panel/clients/setting/color.dart';  // Import color.dart
 
 void main() {
   runApp(
@@ -13,10 +13,7 @@ void main() {
           create: (_) => ThemeNotifier(ThemeData.light()),  // Initialize with the light theme
         ),
         ChangeNotifierProvider(
-          create: (_) => LanguageProvider(),  // Initialize language provider
-        ),
-        ChangeNotifierProvider(
-          create: (_) => Authservices(),  // Initialize Authservices
+          create: (_) => LanguageProvider(),
         ),
       ],
       child: const MyApp(),
@@ -34,35 +31,34 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Appointment CNI',
           debugShowCheckedModeBanner: false,
-          theme: themeNotifier.theme,  // Apply current theme from ThemeNotifier
-          locale: languageProvider.locale,  // Apply current locale from LanguageProvider
-          supportedLocales: const [
-            Locale('en', 'US'),  // English
-            Locale('fr', 'FR'),  // French
-            Locale('es', 'ES'),  // Spanish
+          theme: themeNotifier.theme,  // Use the current theme from the notifier
+          locale: languageProvider.locale,  // Use the current locale from the provider
+          supportedLocales: [
+            Locale('en', 'US'),
+            Locale('fr', 'FR'),
+            Locale('es', 'ES'),
           ],
-          localizationsDelegates: const [
+          localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          home: const SplashScreen(),  // Set SplashScreen as the home page
+          home: const SplashScreen(),
         );
       },
     );
   }
 }
 
-// LanguageProvider class to manage language settings
 class LanguageProvider with ChangeNotifier {
-  Locale _locale = const Locale('en', 'US');  // Default locale
+  Locale _locale = Locale('en', 'US');  // Default locale
 
   Locale get locale => _locale;
 
   void setLocale(Locale locale) {
     if (_locale != locale) {
       _locale = locale;
-      notifyListeners();  // Notify listeners when the locale changes
+      notifyListeners();
     }
   }
 }

@@ -1,181 +1,179 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import '../../provider/ThemeNotifier.dart';
 import '../panel/admin/about_us/about_us.dart';
 import '../panel/admin/crud_user/view_user.dart';
+import '../panel/clients/setting/logout.dart';
 
-class HeaderPage extends StatelessWidget implements PreferredSizeWidget {
-  const HeaderPage({super.key});
+class AdminHeaderPage extends StatelessWidget implements PreferredSizeWidget {
+  const AdminHeaderPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    double appBarHeight = MediaQuery.of(context).size.height * 0.1; // Adjust height as needed
+    double appBarHeight = MediaQuery.of(context).size.height * 0.1; // Responsive height
+    ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context);
 
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: themeNotifier.theme.primaryColor, // Use the current theme's primary color
       elevation: 0,
-      leading: Builder(
-        builder: (context) => IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
-        ),
+      leading: IconButton(
+        icon: Icon(Icons.menu, color: themeNotifier.theme.iconTheme.color),
+        onPressed: () {
+          Scaffold.of(context).openDrawer();
+        },
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.search, color: Colors.black),
+          icon: Icon(Icons.search, color: themeNotifier.theme.iconTheme.color),
           onPressed: () {
             // Handle search press
           },
         ),
         IconButton(
-          icon: const Icon(Icons.wb_sunny_outlined, color: Colors.black),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('Theme Settings'),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.brightness_2, color: Colors.black),
-                          title: const Text('Dark'),
-                          onTap: () {
-                            // Handle dark theme selection
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.brightness_7, color: Colors.black),
-                          title: const Text('Light'),
-                          onTap: () {
-                            // Handle light theme selection
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.settings_brightness, color: Colors.black),
-                          title: const Text('Default'),
-                          onTap: () {
-                            // Handle default theme selection
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Close'),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
+          icon: Icon(Icons.settings, color: themeNotifier.theme.iconTheme.color),
+          onPressed: () => _showSettingsDialog(context),
         ),
         IconButton(
-          icon: const Icon(Icons.settings, color: Colors.black),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('Settings'),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.person),
-                          title: const Text('Profil'),
-                          onTap: () {
-                            Navigator.of(context).pop(); // Close the dialog first
-                            // Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage(),));
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.settings),
-                          title: const Text('Parametre'),
-                          onTap: () {
-                            // Handle Parametre settings
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.support_agent),
-                          title: const Text('Support'),
-                          onTap: () {
-                            Navigator.of(context).pop(); // Close the dialog first
-                            // Navigator.push(context, MaterialPageRoute(builder: (context) => const SupportPage(),));
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.logout),
-                          title: const Text('Se Deconnecter'),
-                          onTap: () {
-                            // Handle Logout
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Close'),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
+          icon: Icon(Icons.wb_sunny_outlined, color: themeNotifier.theme.iconTheme.color),
+          onPressed: () => _showThemeDialog(context),
         ),
       ],
-      toolbarHeight: appBarHeight, // Set AppBar height
+      toolbarHeight: appBarHeight, // Responsive AppBar height
+    );
+  }
+
+  void _showSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Settings'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _createSettingsItem(Icons.person, 'Profile', () {
+                  // Handle profile tap
+                }),
+                _createSettingsItem(Icons.language, 'Language', () {
+                  // Handle language tap
+                }),
+                _createSettingsItem(Icons.logout, 'Log Out', () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LogoutPage()),
+                  );
+                }),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showThemeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Theme Settings'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _createThemeItem(Icons.brightness_2, 'Dark', () {
+                  Provider.of<ThemeNotifier>(context, listen: false).setDarkTheme();
+                }),
+                _createThemeItem(Icons.brightness_4_rounded, 'Light', () {
+                  Provider.of<ThemeNotifier>(context, listen: false).setLightTheme();
+                }),
+                _createThemeItem(Icons.settings_brightness, 'Default', () {
+                  Provider.of<ThemeNotifier>(context, listen: false).setDefaultTheme();
+                }),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _createSettingsItem(IconData icon, String text, GestureTapCallback onTap) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(text),
+      onTap: onTap,
+    );
+  }
+
+  Widget _createThemeItem(IconData icon, String text, GestureTapCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.blueGrey), // Icon color can be styled
+      title: Text(text),
+      onTap: onTap,
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(100); // Fixed height, or adjust as needed
 }
 
-// Drawer for Admin Dashboard
 class AdminDashboardDrawer extends StatelessWidget {
   const AdminDashboardDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
     double drawerWidth = MediaQuery.of(context).size.width * 0.75;
+    double avatarRadius = MediaQuery.of(context).size.width * 0.1;
+    String userName = "John"; // Replace with actual logic to get the user's name
+
     return Drawer(
       child: Column(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blueAccent,
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              color: Colors.blueGrey,
             ),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Admin Dashboard',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: avatarRadius,
+                  backgroundImage: const AssetImage('assets/images/yvan.jpg'), // Replace with the actual path
                 ),
-              ),
+                const SizedBox(width: 16),
+                Text(
+                  'Welcome, $userName!',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
             child: ListView(
+              padding: EdgeInsets.zero,
               children: [
+                _createDashboardItem(context),
                 _createDrawerItem(
                   icon: Icons.group,
                   text: 'Manage Users',
@@ -191,13 +189,6 @@ class AdminDashboardDrawer extends StatelessWidget {
                   text: 'Manage Documents',
                   onTap: () {
                     // Handle manage documents
-                  },
-                ),
-                _createDrawerItem(
-                  icon: Icons.settings,
-                  text: 'Settings',
-                  onTap: () {
-                    // Handle settings
                   },
                 ),
                 _createDrawerItem(
@@ -225,7 +216,34 @@ class AdminDashboardDrawer extends StatelessWidget {
     );
   }
 
-  Widget _createDrawerItem({required IconData icon, required String text, GestureTapCallback? onTap}) {
+  Widget _createDashboardItem(BuildContext context) {
+    return ExpansionTile(
+      leading: const Icon(Icons.dashboard),
+      title: const Text('Dashboard'),
+      children: [
+        _createDrawerItem(
+          icon: Icons.bar_chart,
+          text: 'Statistics',
+          onTap: () {
+            // Handle statistics action
+          },
+        ),
+        _createDrawerItem(
+          icon: Icons.analytics,
+          text: 'Analysis',
+          onTap: () {
+            // Handle analysis action
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _createDrawerItem({
+    required IconData icon,
+    required String text,
+    GestureTapCallback? onTap,
+  }) {
     return ListTile(
       title: Row(
         children: <Widget>[
@@ -233,26 +251,10 @@ class AdminDashboardDrawer extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(text),
-          )
+          ),
         ],
       ),
       onTap: onTap,
-    );
-  }
-}
-
-// Main Scaffold Widget with Header and Drawer
-class MainPage extends StatelessWidget {
-  const MainPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: HeaderPage(),
-      drawer: AdminDashboardDrawer(),
-      body: Center(
-        child: Text('Main Content Area'),
-      ),
     );
   }
 }
