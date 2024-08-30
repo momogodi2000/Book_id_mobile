@@ -9,21 +9,20 @@ class AuthProvider with ChangeNotifier {
   String? get token => _token;
   String? get phone => _phone;
 
-  Future<void> signin(String username, String password) async {
+  Future<void> signup(String name, String email, String password) async {
     try {
-      // Perform sign in using Authservices
-      await _authservices.signin(username, password);
-      _token = 'mocked_token'; // Replace with actual token from the response
+      await _authservices.signup(name, email, password);
+      _token = null; // Or set the token if returned from the signup response
       notifyListeners();
     } catch (error) {
       throw error;
     }
   }
 
-  Future<void> signup(String name, String email, String password) async {
+  Future<void> signin(String email, String password) async {
     try {
-      // Perform sign up using Authservices
-      await _authservices.signup(name, email, password);
+      await _authservices.signin(email, password);
+      _token = _authservices.token;
       notifyListeners();
     } catch (error) {
       throw error;
@@ -32,7 +31,6 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> forgotPassword(String email) async {
     try {
-      // Perform forgot password request using Authservices
       await _authservices.forgotPassword(email);
       notifyListeners();
     } catch (error) {
@@ -42,7 +40,6 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> resetPassword(String email, String newPassword) async {
     try {
-      // Perform reset password using Authservices
       await _authservices.resetPassword(email, newPassword);
       notifyListeners();
     } catch (error) {
@@ -52,7 +49,6 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> linkPhoneNumber(String phone) async {
     try {
-      // Link phone number using Authservices
       await _authservices.linkPhoneNumber(phone);
       _phone = phone;
       notifyListeners();
@@ -63,7 +59,6 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> verifyOTP(String otp) async {
     try {
-      // Perform OTP verification using Authservices
       await _authservices.verifyOTP(otp);
       notifyListeners();
     } catch (error) {
@@ -72,6 +67,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   void logout() {
+    _authservices.logout();
     _token = null;
     _phone = null;
     notifyListeners();

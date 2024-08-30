@@ -3,8 +3,16 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class Authservices with ChangeNotifier {
-  // Base URL of the Django back end
-  final String baseUrl = 'http://127.0.0.1:8000/api';
+  // Base URL of the Django backend
+  final String baseUrl = 'http://192.168.1.173:8000/api';
+
+  // Token and phone for authenticated sessions
+  String? _token;
+  String? _phone;
+
+  // Getters for token and phone
+  String? get token => _token;
+  String? get phone => _phone;
 
   Future<void> signup(String name, String email, String password) async {
     final url = Uri.parse('$baseUrl/register/');
@@ -19,10 +27,8 @@ class Authservices with ChangeNotifier {
         }),
       );
       if (response.statusCode == 201) {
-        // Handle successful signup
         notifyListeners();
       } else {
-        // Handle error
         throw Exception('Failed to sign up');
       }
     } catch (error) {
@@ -30,26 +36,45 @@ class Authservices with ChangeNotifier {
     }
   }
 
-  Future<void> signin(String username, String password) async {
+  Future<void> signin(String email, String password, BuildContext context) async {
     final url = Uri.parse('$baseUrl/login/');
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'username': username,
+          'email': email,
           'password': password,
         }),
       );
       if (response.statusCode == 200) {
-        // Handle successful signin
+        final responseData = json.decode(response.body);
+        _token = responseData['token']; // Handle token
+        String userRole = responseData['data']['role']; // Extract user role
+
+        // Redirect based on user role
+        _redirectBasedOnRole(userRole, context);
+
         notifyListeners();
       } else {
-        // Handle error
         throw Exception('Failed to sign in');
       }
     } catch (error) {
       throw error;
+    }
+  }
+
+  void _redirectBasedOnRole(String role, BuildContext context) {
+    switch (role) {
+      case 'admin':
+        Navigator.pushReplacementNamed(context, '/admin_panel');
+        break;
+      case 'officer':
+        Navigator.pushReplacementNamed(context, '/police_panel');
+        break;
+      default:
+        Navigator.pushReplacementNamed(context, '/clients_panel');
+        break;
     }
   }
 
@@ -62,11 +87,9 @@ class Authservices with ChangeNotifier {
         body: json.encode({'email': email}),
       );
       if (response.statusCode == 200) {
-        // Handle successful password reset request
         notifyListeners();
       } else {
-        // Handle error
-        throw Exception('Failed to send password reset email');
+        throw Exception('Failed to request password reset');
       }
     } catch (error) {
       throw error;
@@ -85,10 +108,8 @@ class Authservices with ChangeNotifier {
         }),
       );
       if (response.statusCode == 200) {
-        // Handle successful password reset
         notifyListeners();
       } else {
-        // Handle error
         throw Exception('Failed to reset password');
       }
     } catch (error) {
@@ -105,10 +126,9 @@ class Authservices with ChangeNotifier {
         body: json.encode({'phone': phone}),
       );
       if (response.statusCode == 200) {
-        // Handle successful phone number linking
+        _phone = phone;
         notifyListeners();
       } else {
-        // Handle error
         throw Exception('Failed to link phone number');
       }
     } catch (error) {
@@ -116,7 +136,7 @@ class Authservices with ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> verifyOTP(String otp) async {
+  Future<void> verifyOTP(String otp) async {
     final url = Uri.parse('$baseUrl/verify-otp/');
     try {
       final response = await http.post(
@@ -125,12 +145,18 @@ class Authservices with ChangeNotifier {
         body: json.encode({'otp': otp}),
       );
       if (response.statusCode == 200) {
-        return json.decode(response.body); // Return the decoded response
+        notifyListeners();
       } else {
         throw Exception('Failed to verify OTP');
       }
     } catch (error) {
       throw error;
     }
+  }
+
+  void logout() {
+    _token = null;
+    _phone = null;
+    notifyListeners();
   }
 }

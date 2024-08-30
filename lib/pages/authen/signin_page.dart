@@ -1,7 +1,6 @@
 import 'package:cni/pages/authen/style/SigninAnimation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../provider/auth_provider.dart';
 import '../../Services/auth_services.dart';
 import 'signup_page.dart';
 import 'forgot_password_page.dart';
@@ -15,7 +14,7 @@ class SigninPage extends StatefulWidget {
 
 class _SigninPageState extends State<SigninPage> {
   final _formKey = GlobalKey<FormState>();
-  String _username = '';
+  String _email = '';
   String _password = '';
   bool _isLoading = false;  // To show loading indicator
 
@@ -47,12 +46,14 @@ class _SigninPageState extends State<SigninPage> {
                         SigninAnimation.buildTitle(screenWidth, 'Sign In'),
                         const SizedBox(height: 20),
                         _buildTextFormField(
-                          label: 'Username',
+                          label: 'Email',
                           obscureText: false,
-                          onSaved: (value) => _username = value!,
+                          onSaved: (value) => _email = value!,
                           validator: (value) {
                             if (value!.isEmpty) {
-                              return 'Please enter your username';
+                              return 'Please enter your email';
+                            } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                              return 'Please enter a valid email';
                             }
                             return null;
                           },
@@ -157,12 +158,11 @@ class _SigninPageState extends State<SigninPage> {
     });
 
     try {
-      // Access the Authservices instance via Provider and call the signin method
       await Provider.of<Authservices>(context, listen: false).signin(
-        _username,
+        _email,
         _password,
+        context, // Pass the context here
       );
-      // On success, you could navigate to the next page or show a success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Sign-in successful!')),
       );

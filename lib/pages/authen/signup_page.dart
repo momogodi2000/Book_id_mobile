@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../provider/auth_provider.dart'; // Adjust the path as needed
+import '../../Services/auth_services.dart';
 import 'forgot_password_page.dart';
 import 'signin_page.dart';
 import 'style/SignupAnimation.dart';
@@ -20,13 +20,33 @@ class _SignupPageState extends State<SignupPage> {
   String _confirmPassword = '';
   bool _rememberMe = false;
 
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      final authServices = Provider.of<Authservices>(context, listen: false);
+      authServices.signup(_name, _email, _password).then((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User created successfully!')),
+        );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SigninPage()),
+        );
+      }).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create account: $error')),
+        );
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return ChangeNotifierProvider(
-      create: (context) => AuthProvider(),
+      create: (context) => Authservices(),
       child: Scaffold(
         backgroundColor: Colors.blueGrey[50],
         body: Padding(
@@ -187,23 +207,7 @@ class _SignupPageState extends State<SignupPage> {
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
                               ),
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  _formKey.currentState!.save();
-                                  Provider.of<AuthProvider>(context, listen: false).signup(
-                                    _name,
-                                    _email,
-                                    _password,
-                                  ).then((_) {
-                                    // Optionally handle success (e.g., navigate to another page)
-                                  }).catchError((error) {
-                                    // Handle signup error (e.g., show a message)
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(error.toString())),
-                                    );
-                                  });
-                                }
-                              },
+                              onPressed: _submitForm,
                               child: Text(
                                 'Create Account',
                                 style: TextStyle(
