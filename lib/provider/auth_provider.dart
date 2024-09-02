@@ -19,12 +19,15 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> signin(String email, String password) async {
+  Future<void> signin(String email, String password, BuildContext context) async {
     try {
-      await _authservices.signin(email, password);
+      await _authservices.signin(email, password, context);
       _token = _authservices.token;
       notifyListeners();
     } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString())),
+      );
       throw error;
     }
   }

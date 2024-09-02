@@ -1,9 +1,14 @@
+import 'package:cni/pages/panel/admin/admin_panel.dart';
+import 'package:cni/pages/panel/clients/clients_panel.dart';
+import 'package:cni/pages/panel/police/police_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:cni/pages/SplashScreen.dart';
 import 'package:cni/provider/ThemeNotifier.dart';  // Import ThemeNotifier for managing themes
 import 'Services/auth_services.dart';  // Import Authservices
+
+
 
 void main() {
   runApp(
@@ -47,6 +52,11 @@ class MyApp extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           home: const SplashScreen(),  // Set SplashScreen as the home page
+          routes: {
+            '/admin_panel': (context) => AdminPanelPage(),  // Admin Panel route
+            '/police_panel': (context) => PolicePanelPage(),  // Police Panel route
+            '/clients_panel': (context) => ClientsPanel(),  // Clients Panel route
+          },
         );
       },
     );

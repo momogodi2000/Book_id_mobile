@@ -49,20 +49,24 @@ class Authservices with ChangeNotifier {
       );
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        _token = responseData['token']; // Handle token
-        String userRole = responseData['data']['role']; // Extract user role
-
-        // Redirect based on user role
+        _token = responseData['token'];
+        String userRole = responseData['data']['role'];
         _redirectBasedOnRole(userRole, context);
-
         notifyListeners();
+      } else if (response.statusCode == 400) {
+        // Show specific error messages
+        final responseData = json.decode(response.body);
+        throw Exception(responseData['message'] ?? 'Invalid credentials');
       } else {
         throw Exception('Failed to sign in');
       }
     } catch (error) {
-      throw error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString())),
+      );
     }
   }
+
 
   void _redirectBasedOnRole(String role, BuildContext context) {
     switch (role) {
@@ -160,3 +164,4 @@ class Authservices with ChangeNotifier {
     notifyListeners();
   }
 }
+

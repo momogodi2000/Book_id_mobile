@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -29,10 +28,9 @@ class _UploadIDPageState extends State<UploadIDPage> {
   void _uploadID() {
     if (_formKey.currentState!.validate() && _image != null) {
       _formKey.currentState!.save();
-      // Logic to upload the image and form data to the database
-      // Replace this with your actual database upload logic
+      // Handle the upload logic in another file here
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Uploading ID...')),
+        const SnackBar(content: Text('ID ready to be uploaded!')),
       );
     } else if (_image == null) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'authen/signin_page.dart';
+import 'anime.dart'; // Import the new animation widget
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -52,16 +53,9 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
         child: Column(
           children: [
-            const Expanded(
+             Expanded(
               child: Center(
-                child: Text(
-                  'Appointment for CNI',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.lightBlue,
-                  ),
-                ),
+                child: WelcomeAnimation(), // Removed 'const' keyword
               ),
             ),
             Padding(
