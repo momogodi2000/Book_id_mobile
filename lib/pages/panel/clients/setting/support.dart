@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart'; // Ensure you have provider in your dependencies
+import '../../../../Services/auth_services.dart';
 
 class SupportPage extends StatefulWidget {
   const SupportPage({super.key});
@@ -13,52 +12,31 @@ class SupportPage extends StatefulWidget {
 class _SupportPageState extends State<SupportPage> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, String>> _messages = [];
-  bool _isLoading = false;
 
-  // Function to send a message and get a response from the AI
+  // Function to handle message sending
   Future<void> _sendMessage(String message) async {
     if (message.isEmpty) return;
 
     setState(() {
-      _isLoading = true;
       _messages.add({'user': message});
     });
 
-    final response = await _callOpenAIAPI(message);
-    if (response != null) {
-      setState(() {
-        _messages.add({'bot': response});
-        _isLoading = false;
-      });
-    }
-  }
-
-  // Function to call OpenAI API
-  Future<String?> _callOpenAIAPI(String message) async {
-    final apiKey = dotenv.env['OPENAI_API_KEY']; // Make sure to add your API key in the .env file
-    const apiUrl = 'https://api.openai.com/v1/chat/completions';
-    final headers = {
-      'Authorization': 'Bearer $apiKey',
-      'Content-Type': 'application/json',
-    };
-    final body = json.encode({
-      'model': 'gpt-4',
-      'messages': [
-        {'role': 'user', 'content': message}
-      ],
-    });
+    // Get the AuthServices instance
+    final authService = Provider.of<Authservices>(context, listen: false);
 
     try {
-      final response = await http.post(Uri.parse(apiUrl), headers: headers, body: body);
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['choices'][0]['message']['content'].trim();
-      } else {
-        return 'Error: ${response.statusCode}';
-      }
-    } catch (e) {
-      return 'Error: $e';
+      // Call the sendSupportMessage method
+      final botResponse = await authService.sendSupportMessage(message);
+      setState(() {
+        _messages.add({'bot': botResponse});
+      });
+    } catch (error) {
+      setState(() {
+        _messages.add({'bot': 'Error: ${error.toString()}'});
+      });
     }
+
+    _controller.clear();
   }
 
   @override
@@ -80,8 +58,8 @@ class _SupportPageState extends State<SupportPage> {
                 final isUser = message.containsKey('user');
                 return Container(
                   alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                  margin: EdgeInsets.symmetric(vertical: 8),
-                  padding: EdgeInsets.all(12),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isUser ? Colors.blueAccent : Colors.grey[300],
                     borderRadius: BorderRadius.circular(12),
@@ -94,11 +72,6 @@ class _SupportPageState extends State<SupportPage> {
               },
             ),
           ),
-          if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(8),
-              child: CircularProgressIndicator(),
-            ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -107,7 +80,7 @@ class _SupportPageState extends State<SupportPage> {
                   child: TextField(
                     controller: _controller,
                     decoration: InputDecoration(
-                      hintText: 'Ask a question...',
+                      hintText: 'Ask a question related to national ID or administrative sector...',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -119,7 +92,6 @@ class _SupportPageState extends State<SupportPage> {
                   icon: const Icon(Icons.send),
                   onPressed: () {
                     _sendMessage(_controller.text);
-                    _controller.clear();
                   },
                 ),
               ],

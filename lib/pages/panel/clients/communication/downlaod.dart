@@ -4,7 +4,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 class DownloadPage extends StatelessWidget {
-  final Map<String, String> communication;
+  final Map<String, dynamic> communication; // Update to dynamic
 
   const DownloadPage({required this.communication, super.key});
 
@@ -69,7 +69,7 @@ class DownloadPage extends StatelessWidget {
     );
   }
 
-  Future<pw.Document> _generatePdf(Map<String, String> communication) async {
+  Future<pw.Document> _generatePdf(Map<String, dynamic> communication) async {
     final pdf = pw.Document();
     final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
     final ttf = pw.Font.ttf(fontData);
@@ -91,17 +91,17 @@ class DownloadPage extends StatelessWidget {
                 ),
                 pw.SizedBox(height: 20),
                 pw.Text(
-                  'Date: ${communication['date']}',
+                  'Date: ${communication['date'] ?? 'N/A'}', // Handle null case
                   style: pw.TextStyle(fontSize: 18, font: ttf),
                 ),
                 pw.SizedBox(height: 10),
                 pw.Text(
-                  'Objective: ${communication['objective']}',
+                  'Objective: ${communication['objective'] ?? 'N/A'}', // Handle null case
                   style: pw.TextStyle(fontSize: 18, font: ttf),
                 ),
                 pw.SizedBox(height: 10),
                 pw.Text(
-                  'Description: ${communication['description']}',
+                  'Description: ${communication['description'] ?? 'N/A'}', // Handle null case
                   style: pw.TextStyle(fontSize: 16, font: ttf),
                 ),
               ],

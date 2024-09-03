@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cni/pages/panel/clients/missing_doc/find_id.dart';
 import 'package:provider/provider.dart';
+import '../../Services/auth_services.dart';
 import '../../provider/ThemeNotifier.dart';
 import '../panel/clients/abouts_us/abouts_us.dart';
 import '../panel/clients/communication/view_com.dart';
@@ -23,7 +24,7 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    double appBarHeight = MediaQuery.of(context).size.height * 0.1; // Responsive height
+    double appBarHeight = MediaQuery.of(context).size.height * 0.1;
 
     return AppBar(
       backgroundColor: Colors.white,
@@ -31,9 +32,7 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
       leading: Builder(
         builder: (context) => IconButton(
           icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
+          onPressed: () => Scaffold.of(context).openDrawer(),
         ),
       ),
       actions: [
@@ -45,132 +44,96 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
         ),
         IconButton(
           icon: const Icon(Icons.settings, color: Colors.black),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('Settings'),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.person),
-                          title: const Text('Profile'),
-
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const ProfilePage()),
-                            );
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.language),
-                          title: const Text('language'), onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const LanguageSelectionPage()),
-                          );
-                        },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.support_agent),
-                          title: const Text('Support'),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const SupportPage()),
-                            );
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.logout),
-                          title: const Text('Log Out'),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const LogoutPage()),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Close'),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
+          onPressed: () => _showSettingsDialog(context),
         ),
         IconButton(
           icon: const Icon(Icons.wb_sunny_outlined, color: Colors.black),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('Theme Settings'),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          leading: Icon(Icons.brightness_2, color: AppColors.darkThemeColor),
-                          title: const Text('Dark'),
-                          onTap: () {
-                            final themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
-                            themeNotifier.setDarkTheme(); // Or setLightTheme(), setDefaultTheme() as needed
-                            Navigator.of(context).pop();
-                          },
-
-                        ),
-                        ListTile(
-                          leading: Icon(Icons.brightness_7, color: AppColors.lightThemeColor),
-                          title: const Text('Light'),
-                          onTap: () {
-                            final themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
-                            themeNotifier.setLightTheme(); // Or setLightTheme(), setDefaultTheme() as needed
-                            Navigator.of(context).pop();
-                          },
-
-                        ),
-                        ListTile(
-                          leading: Icon(Icons.settings_brightness, color: AppColors.defaultThemeColor),
-                          title: const Text('Default'),
-                          onTap: () {
-                            final themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
-                            themeNotifier.setDefaultTheme(); // Or setLightTheme(), setDefaultTheme() as needed
-                            Navigator.of(context).pop();
-                          },
-
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Close'),
-                    ),
-                  ],
-                );
-                },
-            );
-          },
+          onPressed: () => _showThemeSettingsDialog(context),
         ),
       ],
-      toolbarHeight: appBarHeight, // Responsive AppBar height
+      toolbarHeight: appBarHeight,
+    );
+  }
+
+  void _showSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Settings'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _settingsListTile(context, Icons.person, 'Profile', const ProfilePage()),
+                _settingsListTile(context, Icons.language, 'Language', const LanguageSelectionPage()),
+                _settingsListTile(context, Icons.support_agent, 'Support', const SupportPage()),
+                _settingsListTile(context, Icons.logout, 'Log Out', const LogoutPage()),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  ListTile _settingsListTile(BuildContext context, IconData icon, String title, Widget? page, {bool isLogout = false}) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: () {
+        if (isLogout) {
+          Authservices().logout();
+          Navigator.of(context).pop();
+        } else if (page != null) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+        }
+      },
+    );
+  }
+
+  void _showThemeSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Theme Settings'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _themeListTile(context, Icons.brightness_2, 'Dark', (themeNotifier) => themeNotifier.setDarkTheme()),
+                _themeListTile(context, Icons.brightness_7, 'Light', (themeNotifier) => themeNotifier.setLightTheme()),
+                _themeListTile(context, Icons.settings_brightness, 'Default', (themeNotifier) => themeNotifier.setDefaultTheme()),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  ListTile _themeListTile(BuildContext context, IconData icon, String title, Function(ThemeNotifier) onTap) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: () {
+        final themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
+        onTap(themeNotifier);
+        Navigator.of(context).pop();
+      },
     );
   }
 
@@ -178,31 +141,24 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
-// Drawer for Client Dashboard
 class ClientDashboardDrawer extends StatelessWidget {
   const ClientDashboardDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authServices = Provider.of<Authservices>(context); // Get instance of Authservices
     double drawerWidth = MediaQuery.of(context).size.width * 0.75;
-    double avatarRadius = drawerWidth * 0.15;
 
     return Drawer(
       child: Column(
         children: [
           const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blue,
-            ),
+            decoration: BoxDecoration(color: Colors.blue),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Client Dashboard',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -212,52 +168,30 @@ class ClientDashboardDrawer extends StatelessWidget {
                 _createDrawerItem(
                   icon: Icons.event_note,
                   text: 'Booking Appointment',
-                  onTap: () {
-                    // Handle booking appointment
-                  },
+                  onTap: () {}, // Handle booking appointment
                   hasDropdown: true,
                   dropdownItems: [
                     _createDropdownItem(
                       icon: Icons.upload_file,
                       text: 'Upload Document',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const UploadDocPage()),
-                        );
-                      },
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UploadDocPage())),
                     ),
                     _createDropdownItem(
                       icon: Icons.calendar_today,
                       text: 'Choose a Date',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const BookAppointmentPage()),
-                        );
-                      },
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BookAppointmentPage())),
                     ),
                     _createDropdownItem(
                       icon: Icons.payment,
                       text: 'Make Payment',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const MakePaymentPage()),
-                        );
-                      },
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MakePaymentPage())),
                     ),
                   ],
                 ),
                 _createDrawerItem(
                   icon: Icons.track_changes,
                   text: 'Track Application',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const TrackPage()),
-                    );
-                  },
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const TrackPage())),
                 ),
                 _createDrawerItemWithDropdown(
                   icon: Icons.person_search,
@@ -266,74 +200,39 @@ class ClientDashboardDrawer extends StatelessWidget {
                     _createDropdownItem(
                       icon: Icons.upload_file,
                       text: 'Upload Found ID',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const UploadIDPage()),
-                        );
-                      },
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UploadIDPage())),
                     ),
                     _createDropdownItem(
                       icon: Icons.search,
                       text: 'Search for ID',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const FindIDPage()),
-                        );
-                      },
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FindIDPage())),
                     ),
                   ],
                 ),
                 _createDrawerItem(
                   icon: Icons.info_outline,
                   text: 'About Us',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const AboutUsPage()),
-                    );
-                  },
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutUsPage())),
                 ),
                 _createDrawerItem(
                   icon: Icons.message,
                   text: 'Communication',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CommunicationPage()),
-                    );
-                  },
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CommunicationPage())),
                 ),
                 _createDrawerItem(
                   icon: Icons.contact_mail,
                   text: 'Contact Us',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ContactUsPage()),
-                    );
-                  },
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactUsPage())),
                 ),
                 _createDrawerItem(
                   icon: Icons.call,
                   text: 'Call Center',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CallCenterPage()),
-                    );
-                  },
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CallCenterPage())),
                 ),
                 _createDrawerItem(
                   icon: Icons.history,
                   text: 'Why having Id Card?',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) =>  HistoryPage()),
-                    );
-                  },
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HistoryPage())),
                 ),
               ],
             ),
@@ -343,18 +242,13 @@ class ClientDashboardDrawer extends StatelessWidget {
             child: Row(
               children: [
                 CircleAvatar(
-                  radius: avatarRadius,
-                  backgroundImage: const NetworkImage(
-                    'assets/images/auth.jpeg', // Replace with the client's profile image URL
-                  ),
+                  radius: 30,
+                  backgroundImage: NetworkImage(authServices.profilePicture ?? 'https://example.com/default_avatar.png'), // Use instance
                 ),
                 const SizedBox(width: 16),
-                const Text(
-                  'Client Name',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Text(
+                  authServices.name ?? 'Loading...', // Use instance
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -363,6 +257,8 @@ class ClientDashboardDrawer extends StatelessWidget {
       ),
     );
   }
+
+
 
   Widget _createDrawerItem({
     required IconData icon,

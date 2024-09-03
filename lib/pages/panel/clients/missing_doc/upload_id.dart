@@ -1,6 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import '../../../../Services/auth_services.dart';
 
 class UploadIDPage extends StatefulWidget {
   const UploadIDPage({super.key});
@@ -25,13 +30,33 @@ class _UploadIDPageState extends State<UploadIDPage> {
     });
   }
 
-  void _uploadID() {
+  Future<void> _uploadID() async {
     if (_formKey.currentState!.validate() && _image != null) {
       _formKey.currentState!.save();
-      // Handle the upload logic in another file here
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ID ready to be uploaded!')),
-      );
+
+      try {
+        final response = await context.read<Authservices>().uploadID(
+          username: username,
+          phone: phoneNumber,
+          email: email,
+          dateFound: selectedDate.toIso8601String(),
+          imagePath: _image!.path,
+        );
+
+        if (response.statusCode == 201) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('ID uploaded successfully!')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to upload ID.')),
+          );
+        }
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $error')),
+        );
+      }
     } else if (_image == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select an image.')),

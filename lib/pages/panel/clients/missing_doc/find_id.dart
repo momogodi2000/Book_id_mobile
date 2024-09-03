@@ -1,7 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+// Import the DetailMissingPage
+import '../../../../Services/auth_services.dart';
+import 'DetailMissingPage.dart';
 
-class FindIDPage extends StatelessWidget {
-  const FindIDPage({super.key});
+class FindIDPage extends StatefulWidget {
+  const FindIDPage({Key? key}) : super(key: key);
+
+  @override
+  _FindIDPageState createState() => _FindIDPageState();
+}
+
+class _FindIDPageState extends State<FindIDPage> {
+  List<dynamic> foundIDs = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMissingIDCards();
+  }
+
+  Future<void> fetchMissingIDCards() async {
+    // Assuming you have a provider setup for Authservices
+    final authService = Provider.of<Authservices>(context, listen: false);
+    try {
+      final ids = await authService.fetchMissingIDCards();
+      setState(() {
+        foundIDs = ids;
+        isLoading = false;
+      });
+    } catch (error) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error fetching missing IDs: $error');
+    }
+  }
+
+  void _showDetailDialog(dynamic idCard) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return DetailMissingPage(idCard: idCard);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +62,9 @@ class FindIDPage extends StatelessWidget {
           horizontal: screenWidth * 0.05,
           vertical: screenHeight * 0.03,
         ),
-        child: SingleChildScrollView(
+        child: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -66,72 +112,56 @@ class FindIDPage extends StatelessWidget {
   }
 
   Widget _buildIDCardList(double screenHeight, double screenWidth) {
-    // Example data (replace with your actual data)
-    final List<Map<String, String>> foundIDs = [
-      {
-        'username': 'John Doe',
-        'dateFound': '2024-08-15',
-        'phoneNumber': '123-456-7890',
-        'email': 'john.doe@example.com',
-        'imagePath': 'assets/images/momo.jpg', // Replace with actual image paths
-      },
-      {
-        'username': 'Jane Smith',
-        'dateFound': '2024-08-10',
-        'phoneNumber': '987-654-3210',
-        'email': 'jane.smith@example.com',
-        'imagePath': 'assets/images/auth.jpeg', // Replace with actual image paths
-      },
-      // Add more entries as needed
-    ];
-
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: foundIDs.length,
       itemBuilder: (context, index) {
         final idCard = foundIDs[index];
-        return Card(
-          margin: EdgeInsets.only(bottom: screenHeight * 0.03),
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(screenWidth * 0.04),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Found by: ${idCard['username']}',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.05,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueAccent,
+        return GestureDetector(
+          onTap: () => _showDetailDialog(idCard), // Show dialog on tap
+          child: Card(
+            margin: EdgeInsets.only(bottom: screenHeight * 0.03),
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(screenWidth * 0.04),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Found by: ${idCard['name']}',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.05,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                    ),
                   ),
-                ),
-                SizedBox(height: screenHeight * 0.01),
-                Text(
-                  'Date Found: ${idCard['dateFound']}',
-                  style: TextStyle(fontSize: screenWidth * 0.04),
-                ),
-                SizedBox(height: screenHeight * 0.01),
-                Text(
-                  'Contact: ${idCard['phoneNumber']}',
-                  style: TextStyle(fontSize: screenWidth * 0.04),
-                ),
-                Text(
-                  'Email: ${idCard['email']}',
-                  style: TextStyle(fontSize: screenWidth * 0.04),
-                ),
-                SizedBox(height: screenHeight * 0.02),
-                Image.asset(
-                  idCard['imagePath']!,
-                  height: screenHeight * 0.25,
-                  width: screenWidth,
-                  fit: BoxFit.cover,
-                ),
-              ],
+                  SizedBox(height: screenHeight * 0.01),
+                  Text(
+                    'Date Found: ${idCard['date_found']}',
+                    style: TextStyle(fontSize: screenWidth * 0.04),
+                  ),
+                  SizedBox(height: screenHeight * 0.01),
+                  Text(
+                    'Contact: ${idCard['phone']}',
+                    style: TextStyle(fontSize: screenWidth * 0.04),
+                  ),
+                  Text(
+                    'Email: ${idCard['email']}',
+                    style: TextStyle(fontSize: screenWidth * 0.04),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  Image.network(
+                    'http://192.168.1.173:8000${idCard['id_card_image']}', // Adjust the URL as needed
+                    height: screenHeight * 0.25,
+                    width: screenWidth,
+                    fit: BoxFit.cover,
+                  ),
+                ],
+              ),
             ),
           ),
         );

@@ -1,9 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../Services/auth_services.dart';
 import 'downlaod.dart';
 
-
-class CommunicationPage extends StatelessWidget {
+class CommunicationPage extends StatefulWidget {
   const CommunicationPage({super.key});
+
+  @override
+  _CommunicationPageState createState() => _CommunicationPageState();
+}
+
+class _CommunicationPageState extends State<CommunicationPage> {
+  List<dynamic> communications = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCommunications();
+  }
+
+  Future<void> fetchCommunications() async {
+    final authServices = Provider.of<Authservices>(context, listen: false);
+    try {
+      final data = await authServices.fetchCommunications();
+      setState(() {
+        communications = data;
+        isLoading = false;
+      });
+    } catch (error) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $error')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +53,15 @@ class CommunicationPage extends StatelessWidget {
           horizontal: screenWidth * 0.05,
           vertical: screenHeight * 0.03,
         ),
-        child: SingleChildScrollView(
+        child: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildAnimatedHeader(screenWidth),
               SizedBox(height: screenHeight * 0.05),
-              _buildCommunicationList(screenWidth, screenHeight, context),
+              _buildCommunicationList(screenWidth, screenHeight),
             ],
           ),
         ),
@@ -54,31 +89,15 @@ class CommunicationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCommunicationList(double screenWidth, double screenHeight, BuildContext context) {
-    // Simulate fetching data from a database
-    final List<Map<String, String>> communications = [
-      {
-        'date': '2024-08-20',
-        'description': 'New ID Card Processing Guidelines Released.',
-        'objective': 'To inform citizens of the new process.',
-        'photo': 'assets/icons/logo.jpeg', // Replace with an actual image
-      },
-      {
-        'date': '2024-08-18',
-        'description': 'National ID Card Appointment System Updated.',
-        'objective': 'To ensure smoother operations.',
-        'photo': 'assets/icons/logo.jpeg', // Replace with an actual image
-      },
-    ];
-
+  Widget _buildCommunicationList(double screenWidth, double screenHeight) {
     return Column(
       children: communications.map((communication) {
-        return _buildCommunicationCard(communication, screenWidth, screenHeight, context);
+        return _buildCommunicationCard(communication, screenWidth, screenHeight);
       }).toList(),
     );
   }
 
-  Widget _buildCommunicationCard(Map<String, String> communication, double screenWidth, double screenHeight, BuildContext context) {
+  Widget _buildCommunicationCard(Map<String, dynamic> communication, double screenWidth, double screenHeight) {
     return Padding(
       padding: EdgeInsets.only(bottom: screenHeight * 0.03),
       child: TweenAnimationBuilder(
@@ -97,15 +116,15 @@ class CommunicationPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Image.asset(
-                      communication['photo']!,
+                    Image.network(
+                      communication['location'], // Use network image for file URL
                       width: screenWidth,
                       height: screenHeight * 0.25,
                       fit: BoxFit.cover,
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Text(
-                      'Date: ${communication['date']}',
+                      'Title: ${communication['title']}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -113,22 +132,6 @@ class CommunicationPage extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.01),
-                    Text(
-                      'Objective: ${communication['objective']}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.01),
-                    Text(
-                      'Description: ${communication['description']}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black54,
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.push(

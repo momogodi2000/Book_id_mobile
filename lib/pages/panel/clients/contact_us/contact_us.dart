@@ -1,7 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../Services/auth_services.dart';
 
-class ContactUsPage extends StatelessWidget {
+class ContactUsPage extends StatefulWidget {
   const ContactUsPage({super.key});
+
+  @override
+  _ContactUsPageState createState() => _ContactUsPageState();
+}
+
+class _ContactUsPageState extends State<ContactUsPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+
+  Future<void> _sendMessage() async {
+    final String name = _nameController.text;
+    final String email = _emailController.text;
+    final String message = _messageController.text;
+
+    if (name.isEmpty || email.isEmpty || message.isEmpty) {
+      _showSnackbar('Please fill in all fields');
+      return;
+    }
+
+    try {
+      await Provider.of<Authservices>(context, listen: false)
+          .contactUs(name, email, message); // Include name in the API call if needed
+      _showSnackbar('Message sent successfully!');
+      _nameController.clear();
+      _emailController.clear();
+      _messageController.clear();
+    } catch (error) {
+      _showSnackbar('Failed to send message: $error');
+    }
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,12 +82,21 @@ class ContactUsPage extends StatelessWidget {
               ),
               SizedBox(height: screenHeight * 0.03),
               _buildTextField(
+                controller: _nameController,
+                label: 'Name',
+                hintText: 'Enter your name',
+                icon: Icons.person,
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              _buildTextField(
+                controller: _emailController,
                 label: 'Email',
                 hintText: 'Enter your email',
                 icon: Icons.email,
               ),
               SizedBox(height: screenHeight * 0.02),
               _buildTextField(
+                controller: _messageController,
                 label: 'Message',
                 hintText: 'Enter your message',
                 icon: Icons.message,
@@ -57,9 +105,7 @@ class ContactUsPage extends StatelessWidget {
               SizedBox(height: screenHeight * 0.05),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Handle send message logic
-                  },
+                  onPressed: _sendMessage,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
                     padding: EdgeInsets.symmetric(
@@ -88,12 +134,14 @@ class ContactUsPage extends StatelessWidget {
   }
 
   Widget _buildTextField({
+    required TextEditingController controller,
     required String label,
     required String hintText,
     required IconData icon,
     int maxLines = 1,
   }) {
     return TextField(
+      controller: controller,
       maxLines: maxLines,
       decoration: InputDecoration(
         labelText: label,
