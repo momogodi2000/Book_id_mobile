@@ -11,6 +11,7 @@ import '../panel/clients/manage_doc/book_appointment.dart';
 import '../panel/clients/manage_doc/payment.dart';
 import '../panel/clients/manage_doc/upload_doc.dart';
 import '../panel/clients/missing_doc/upload_id.dart';
+import '../panel/clients/police_grade/grade.dart';
 import '../panel/clients/setting/LanguageSelectionPage.dart';
 import '../panel/clients/setting/call_center.dart';
 import '../panel/clients/setting/color.dart';
@@ -227,7 +228,12 @@ class ClientDashboardDrawer extends StatelessWidget {
                 _createDrawerItem(
                   icon: Icons.call,
                   text: 'Call Center',
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CallCenterPage())),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CombinedContactPage())),
+                ),
+                _createDrawerItem(
+                  icon: Icons.grade,
+                  text: 'Police Grade',
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  PoliceOfficerGradesPage())),
                 ),
                 _createDrawerItem(
                   icon: Icons.history,

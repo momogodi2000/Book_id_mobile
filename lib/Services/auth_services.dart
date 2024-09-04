@@ -1,6 +1,12 @@
+import 'dart:io';
+import 'package:path/path.dart'; // Import this
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:intl/intl.dart';
+
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Authservices with ChangeNotifier {
   // Base URL of the Django backend
@@ -175,35 +181,50 @@ class Authservices with ChangeNotifier {
   }
 
 
-
-
-  Future<http.Response> uploadID({
+  Future<void> uploadID({
     required String username,
     required String phone,
     required String email,
-    required String dateFound,
+    required DateTime dateFound, // Accept DateTime
     required String imagePath,
   }) async {
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/missing-cards/'), // Update with your actual endpoint
-    );
+    final url = Uri.parse('$baseUrl/missing-cards/');
 
-    request.fields['name'] = username;
-    request.fields['phone'] = phone;
-    request.fields['email'] = email;
-    request.fields['date_found'] = dateFound;
+    try {
+      // Format the date to YYYY-MM-DD
+      String formattedDate = DateFormat('yyyy-MM-dd').format(dateFound);
 
-    request.files.add(
-      await http.MultipartFile.fromPath(
-        'id_card_image',
-        imagePath,
-      ),
-    );
+      // Create a multipart request for the POST operation
+      final request = http.MultipartRequest('POST', url)
+        ..fields['name'] = username
+        ..fields['phone'] = phone
+        ..fields['email'] = email
+        ..fields['date_found'] = formattedDate; // Use the formatted date
 
-    final response = await request.send();
-    return await http.Response.fromStream(response);
+      // Add the image file to the request
+      request.files.add(await http.MultipartFile.fromPath('id_card_image', imagePath));
+
+      // Send the request
+      final streamedResponse = await request.send();
+
+      // Get the response from the stream
+      final response = await http.Response.fromStream(streamedResponse);
+
+      // Check for success (status code 201)
+      if (response.statusCode == 201) {
+        // Successful upload
+        return; // No need to throw an exception for success
+      } else {
+        // Handle failure (status codes other than 201)
+        throw Exception('Failed to upload ID: ${response.body}');
+      }
+    } catch (error) {
+      // Handle any errors that occurred during the upload process
+      throw Exception('Error during upload: $error');
+    }
   }
+
+
 
 
 
@@ -365,6 +386,124 @@ class Authservices with ChangeNotifier {
       throw error;
     }
   }
+
+  Future<List<dynamic>> fetchPoliceStations(double lat, double lng) async {
+    final url = Uri.parse('$baseUrl/nearby-police-stations/');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'latitude': lat, 'longitude': lng}),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['police_stations'];
+    } else {
+      throw Exception('Failed to load police stations');
+    }
+  }
+
+
+
+
+  Future<void> uploadDocuments(Map<String, File?> documents, String userId) async {
+    final uri = Uri.parse('$baseUrl/documents/');
+    final request = http.MultipartRequest('POST', uri);
+
+    request.fields['user'] = userId;
+
+    for (var entry in documents.entries) {
+      if (entry.value != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            entry.key,
+            entry.value!.path,
+            filename: basename(entry.value!.path), // Use basename here
+          ),
+        );
+      }
+    }
+
+    final response = await request.send();
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to upload documents');
+    }
+  }
+
+
+  // Method to save user ID (this should be called after login)
+  Future<void> saveUserId(int userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('userId', userId);
+  }
+
+  // Method to get user ID
+  Future<int> getCurrentUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('userId');
+    if (userId != null) {
+      return userId;
+    } else {
+      throw Exception('User ID not found');
+    }
+  }
+
+
+
+
+
+  Future<void> bookAppointment({
+    required DateTime date,
+    required String time,
+    required int userId,
+
+  }) async {
+    final url = Uri.parse('$baseUrl/appointments/get-add/');
+    try {
+      final response = await http.post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            // 'Authorization': 'Bearer $_token', // Uncomment if using token
+          },
+          body: json.encode({
+            'date': date.toIso8601String(),
+            'time': time,
+            'user': userId,
+
+          }),
+          );
+      if (response.statusCode != 200) {
+        throw Exception('Failed to book appointment: ${response.body}');
+      }
+    } catch (error) {
+  throw error;
+  }
+}
+
+
+  Future<Map<String, dynamic>> submitPayment(String phone, String userId) async {
+    final url = Uri.parse('$baseUrl/payments/');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'phone': phone,
+          'user': userId,
+        }),
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to process payment');
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
 }
 
 

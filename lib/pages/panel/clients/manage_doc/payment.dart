@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cni/pages/panel/clients/manage_doc/payment/MobilePaymentForm.dart';
+import 'package:cni/pages/panel/clients/manage_doc/payment/PaypalPaymentForm.dart';
 
 class MakePaymentPage extends StatefulWidget {
   const MakePaymentPage({super.key});
@@ -9,14 +11,14 @@ class MakePaymentPage extends StatefulWidget {
 
 class _MakePaymentPageState extends State<MakePaymentPage>
     with SingleTickerProviderStateMixin {
-  String? _selectedPaymentMethod; // To store the selected payment method
-  final _formKey = GlobalKey<FormState>(); // Key for the form
+  String? _selectedPaymentMethod;
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _bankNameController = TextEditingController();
   final TextEditingController _accountNumberController = TextEditingController();
   final TextEditingController _routingNumberController = TextEditingController();
-  AnimationController? _animationController;
-  Animation<double>? _fadeAnimation;
+  late final AnimationController _animationController;
+  late final Animation<double> _fadeAnimation;
 
   @override
   void initState() {
@@ -26,15 +28,15 @@ class _MakePaymentPageState extends State<MakePaymentPage>
       vsync: this,
     );
     _fadeAnimation = CurvedAnimation(
-      parent: _animationController!,
+      parent: _animationController,
       curve: Curves.easeInOut,
     );
-    _animationController!.forward();
+    _animationController.forward();
   }
 
   @override
   void dispose() {
-    _animationController?.dispose();
+    _animationController.dispose();
     _mobileController.dispose();
     _bankNameController.dispose();
     _accountNumberController.dispose();
@@ -49,187 +51,95 @@ class _MakePaymentPageState extends State<MakePaymentPage>
           content: Text("Payment submitted successfully!"),
         ),
       );
+      // Optionally clear form or perform additional actions
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final isPortrait = size.height > size.width;
+    final padding = EdgeInsets.symmetric(
+      horizontal: size.width * 0.05,
+      vertical: size.height * 0.03,
+    );
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Make Payment"),
+        backgroundColor: Colors.blue,
       ),
-      body: FadeTransition(
-        opacity: _fadeAnimation!,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Choose a Payment Method",
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
+      body: Padding(
+        padding: padding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Choose a Payment Method",
+              style: TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueAccent,
               ),
-              const SizedBox(height: 20.0),
-              ListTile(
-                title: const Text("Mobile Payment"),
-                leading: Radio<String>(
-                  value: "mobile",
-                  groupValue: _selectedPaymentMethod,
-                  onChanged: (String? value) {
-                    setState(() {
-                      _selectedPaymentMethod = value;
-                    });
-                  },
-                ),
-              ),
-              ListTile(
-                title: const Text("PayPal Payment"),
-                leading: Radio<String>(
-                  value: "paypal",
-                  groupValue: _selectedPaymentMethod,
-                  onChanged: (String? value) {
-                    setState(() {
-                      _selectedPaymentMethod = value;
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(height: 20.0),
-              Expanded(
-                child: Form(
-                  key: _formKey,
-                  child: SingleChildScrollView(
-                    child: _selectedPaymentMethod == null
-                        ? Container()
-                        : _selectedPaymentMethod == "mobile"
-                        ? _buildMobilePaymentForm(isPortrait)
-                        : _buildPaypalPaymentForm(isPortrait),
+            ),
+            const SizedBox(height: 20.0),
+            _buildPaymentMethodSelector(),
+            const SizedBox(height: 20.0),
+            Expanded(
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: _selectedPaymentMethod == null
+                      ? Container()
+                      : _selectedPaymentMethod == "mobile"
+                      ? MobilePaymentForm(
+                    fadeAnimation: _fadeAnimation,
+                    mobileController: _mobileController,
+                  )
+                      : PaypalPaymentForm(
+                    fadeAnimation: _fadeAnimation,
+                    bankNameController: _bankNameController,
+                    accountNumberController: _accountNumberController,
+                    routingNumberController: _routingNumberController,
                   ),
                 ),
               ),
-              const SizedBox(height: 20.0),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _submitPayment,
-                  child: const Text("Submit Payment"),
-                ),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 20.0),
+
+          ],
         ),
       ),
     );
   }
 
-  // Mobile Payment Form
-  Widget _buildMobilePaymentForm(bool isPortrait) {
-    return FadeTransition(
-      opacity: _fadeAnimation!,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Mobile Payment",
-            style: TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20.0),
-          TextFormField(
-            controller: _mobileController,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              labelText: "Mobile Phone Number",
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return "Please enter your mobile phone number";
-              }
-              if (!RegExp(r'^\d{10,15}$').hasMatch(value)) {
-                return "Please enter a valid phone number";
-              }
-              return null;
+  Widget _buildPaymentMethodSelector() {
+    return Column(
+      children: [
+        ListTile(
+          title: const Text("Mobile Payment"),
+          leading: Radio<String>(
+            value: "mobile",
+            groupValue: _selectedPaymentMethod,
+            onChanged: (String? value) {
+              setState(() {
+                _selectedPaymentMethod = value;
+              });
             },
           ),
-        ],
-      ),
-    );
-  }
-
-  // PayPal Payment Form
-  Widget _buildPaypalPaymentForm(bool isPortrait) {
-    return FadeTransition(
-      opacity: _fadeAnimation!,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "PayPal Payment",
-            style: TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20.0),
-          TextFormField(
-            controller: _bankNameController,
-            decoration: const InputDecoration(
-              labelText: "Bank Name",
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return "Please enter your bank name";
-              }
-              return null;
+        ),
+        ListTile(
+          title: const Text("PayPal Payment"),
+          leading: Radio<String>(
+            value: "paypal",
+            groupValue: _selectedPaymentMethod,
+            onChanged: (String? value) {
+              setState(() {
+                _selectedPaymentMethod = value;
+              });
             },
           ),
-          const SizedBox(height: 20.0),
-          TextFormField(
-            controller: _accountNumberController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: "Account Number",
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return "Please enter your account number";
-              }
-              if (!RegExp(r'^\d{8,17}$').hasMatch(value)) {
-                return "Please enter a valid account number";
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 20.0),
-          TextFormField(
-            controller: _routingNumberController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: "Routing Number",
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return "Please enter your routing number";
-              }
-              if (!RegExp(r'^\d{9}$').hasMatch(value)) {
-                return "Please enter a valid routing number";
-              }
-              return null;
-            },
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

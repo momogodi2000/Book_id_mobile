@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import '../../../../Services/auth_services.dart';
+import 'book_appointment.dart';
 
 class UploadDocPage extends StatefulWidget {
   const UploadDocPage({super.key});
@@ -9,12 +12,33 @@ class UploadDocPage extends StatefulWidget {
   _UploadDocPageState createState() => _UploadDocPageState();
 }
 
-class _UploadDocPageState extends State<UploadDocPage> {
-  final List<File?> _documents = List<File?>.filled(5, null);
+class _UploadDocPageState extends State<UploadDocPage> with SingleTickerProviderStateMixin {
+  final List<File?> _documents = List<File?>.filled(6, null);
   final _picker = ImagePicker();
-  final List<String> allowedFormats = ["pdf", "jpg", "jpeg", "png"]; // Allowed formats
 
-  // Function to pick a document
+  final List<String> allowedFormats = ["pdf", "jpg", "jpeg", "png"];
+  final List<String> _documentNames = [
+    "Birth Certificate",
+    "Proof of Nationality",
+    "Passport Photos",
+    "Residence Permit",
+    "Marriage Certificate",
+    "Death Certificate",
+  ];
+
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+  }
+
   Future<void> _pickDocument(int index, ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
 
@@ -24,6 +48,7 @@ class _UploadDocPageState extends State<UploadDocPage> {
       if (allowedFormats.contains(fileExtension)) {
         setState(() {
           _documents[index] = File(pickedFile.path);
+          _controller.forward(from: 0.0);
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -35,25 +60,41 @@ class _UploadDocPageState extends State<UploadDocPage> {
     }
   }
 
-  // Function to validate all files before submission
   bool _validateFiles() {
-    for (var doc in _documents) {
-      if (doc == null) {
-        return false;
-      }
-    }
-    return true;
+    return _documents.every((doc) => doc != null);
   }
 
-  // Function to submit files
-  void _submitDocuments() {
+  Future<void> _submitDocuments() async {
     if (_validateFiles()) {
-      // Upload documents to the database
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Documents successfully submitted!"),
-        ),
-      );
+      final authService = Provider.of<Authservices>(context, listen: false);
+      try {
+        final userId = (await authService.getCurrentUserId()).toString(); // Convert to String
+
+        final documentsMap = {
+          'birth_certificate': _documents[0],
+          'proof_of_nationality': _documents[1],
+          'criminal_record_extract': _documents[2],
+          'residence_permit': _documents[3],
+          'marriage_certificate': _documents[4],
+        };
+
+        await authService.uploadDocuments(documentsMap, userId);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Documents uploaded successfully!"),
+          ),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const BookAppointmentPage()),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -99,18 +140,26 @@ class _UploadDocPageState extends State<UploadDocPage> {
                 itemBuilder: (context, index) {
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    elevation: 4.0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text(
+                            _documentNames[index],
+                            style: const TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8.0),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                "Document ${index + 1}",
-                                style: const TextStyle(fontSize: 18.0),
-                              ),
                               Row(
                                 children: [
                                   IconButton(
@@ -123,20 +172,27 @@ class _UploadDocPageState extends State<UploadDocPage> {
                                   ),
                                 ],
                               ),
+                              _documents[index] != null
+                                  ? FadeTransition(
+                                opacity: _animation,
+                                child: Container(
+                                  height: isPortrait ? 100 : 80,
+                                  width: isPortrait ? 80 : 60,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    image: DecorationImage(
+                                      image: FileImage(_documents[index]!),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              )
+                                  : const Text(
+                                "No document",
+                                style: TextStyle(color: Colors.blueGrey),
+                              ),
                             ],
                           ),
-                          if (_documents[index] != null)
-                            Container(
-                              height: isPortrait ? 150 : 100,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8.0),
-                                image: DecorationImage(
-                                  image: FileImage(_documents[index]!),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     ),
@@ -147,8 +203,18 @@ class _UploadDocPageState extends State<UploadDocPage> {
             const SizedBox(height: 20.0),
             Center(
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  backgroundColor: Theme.of(context).primaryColor,
+                ),
                 onPressed: _submitDocuments,
-                child: const Text("Submit"),
+                child: const Text(
+                  "Submit",
+                  style: TextStyle(fontSize: 18.0),
+                ),
               ),
             ),
           ],

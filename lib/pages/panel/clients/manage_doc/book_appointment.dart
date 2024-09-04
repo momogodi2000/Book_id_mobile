@@ -1,6 +1,9 @@
+import 'package:cni/pages/panel/clients/manage_doc/payment.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // For formatting the date
-import 'package:table_calendar/table_calendar.dart'; // For the calendar widget
+import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:provider/provider.dart';
+import '../../../../Services/auth_services.dart';
 
 class BookAppointmentPage extends StatefulWidget {
   const BookAppointmentPage({super.key});
@@ -11,10 +14,11 @@ class BookAppointmentPage extends StatefulWidget {
 
 class _BookAppointmentPageState extends State<BookAppointmentPage>
     with SingleTickerProviderStateMixin {
-  DateTime _selectedDate = DateTime.now(); // Default selected date is today
-  CalendarFormat _calendarFormat = CalendarFormat.month; // Monthly view format
-  AnimationController? _controller; // Animation controller
-  Animation<double>? _fadeAnimation; // Fade animation
+  DateTime _selectedDate = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay.now();
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  AnimationController? _controller;
+  Animation<double>? _fadeAnimation;
 
   @override
   void initState() {
@@ -27,7 +31,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
       parent: _controller!,
       curve: Curves.easeInOut,
     );
-    _controller!.forward(); // Start the animation
+    _controller!.forward();
   }
 
   @override
@@ -42,25 +46,62 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
     });
   }
 
-  // Function to format the date to display on the button
-  String _formatDate(DateTime date) {
-    return DateFormat.yMMMMd().format(date);
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime,
+    );
+    if (picked != null && picked != _selectedTime) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
   }
 
-  // Function to handle booking submission
-  void _submitBooking() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Appointment booked for ${_formatDate(_selectedDate)}."),
-      ),
-    );
+  String _formatDate(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date); // Correct format
+  }
+
+  String _formatTime(TimeOfDay time) {
+    final now = DateTime.now();
+    final formattedTime = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    return DateFormat('HH:mm:ss').format(formattedTime); // Correct format
+  }
+
+  Future<void> _submitBooking() async {
+    final authService = Provider.of<Authservices>(context, listen: false);
+    final userId = 1; // Replace with actual user ID
+
+    try {
+      await authService.bookAppointment(
+        date: _selectedDate,
+        time: _formatTime(_selectedTime),
+        userId: userId,
+
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Appointment booked for ${_formatDate(_selectedDate)} at ${_formatTime(_selectedTime)}."),
+        ),
+      );
+
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MakePaymentPage()),
+        );
+      });
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: $error"),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isPortrait = size.height > size.width;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Book Appointment"),
@@ -105,10 +146,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
                     color: Colors.grey.shade300,
                     shape: BoxShape.circle,
                   ),
-                  markerDecoration: const BoxDecoration(
-                    color: Colors.blueAccent,
-                    shape: BoxShape.circle,
-                  ),
                 ),
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
@@ -118,6 +155,11 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+              ),
+              const SizedBox(height: 20.0),
+              TextButton(
+                onPressed: () => _selectTime(context),
+                child: Text("Select Time: ${_formatTime(_selectedTime)}"),
               ),
               const SizedBox(height: 20.0),
               Center(
@@ -134,7 +176,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Text(
-                    "Please ensure that you select a valid date for booking your national ID card.",
+                    "Please ensure that you select a valid date and time for booking your national ID card.",
                     style: TextStyle(color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),

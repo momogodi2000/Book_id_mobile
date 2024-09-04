@@ -2,9 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-
+import 'package:intl/intl.dart'; // Import the intl package for date formatting
 import '../../../../Services/auth_services.dart';
 
 class UploadIDPage extends StatefulWidget {
@@ -35,23 +33,17 @@ class _UploadIDPageState extends State<UploadIDPage> {
       _formKey.currentState!.save();
 
       try {
-        final response = await context.read<Authservices>().uploadID(
+        await context.read<Authservices>().uploadID(
           username: username,
           phone: phoneNumber,
           email: email,
-          dateFound: selectedDate.toIso8601String(),
+          dateFound: selectedDate, // Pass the DateTime object
           imagePath: _image!.path,
         );
 
-        if (response.statusCode == 201) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('ID uploaded successfully!')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to upload ID.')),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ID uploaded successfully!')),
+        );
       } catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $error')),
@@ -63,6 +55,7 @@ class _UploadIDPageState extends State<UploadIDPage> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

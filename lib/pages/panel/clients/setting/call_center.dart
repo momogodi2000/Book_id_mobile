@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class CallCenterPage extends StatelessWidget {
-  const CallCenterPage({super.key});
+class CombinedContactPage extends StatelessWidget {
+  const CombinedContactPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,40 +10,27 @@ class CallCenterPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Call Center'),
+        title: const Text('Contact Us'),
         backgroundColor: Colors.blueAccent,
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: screenWidth * 0.1,
-          vertical: screenHeight * 0.05,
-        ),
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.05,
+            vertical: screenHeight * 0.02,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildAnimatedHeader(screenWidth),
               SizedBox(height: screenHeight * 0.05),
-              const Text(
-                'Need Assistance?',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.03),
-              const Text(
-                'Our call center is here to help you with any questions or issues regarding the national ID card process. Our dedicated team is available to assist you.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.03),
+              _buildAssistanceSection(screenHeight),
+              SizedBox(height: screenHeight * 0.05),
               _buildContactMethods(screenWidth, screenHeight),
               SizedBox(height: screenHeight * 0.05),
               _buildSocialMediaLinks(screenWidth),
+              SizedBox(height: screenHeight * 0.05),
+              _buildRegionContacts(),
             ],
           ),
         ),
@@ -64,6 +51,29 @@ class CallCenterPage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildAssistanceSection(double screenHeight) {
+    return Column(
+      children: [
+        const Text(
+          'Need Assistance?',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.blueAccent,
+          ),
+        ),
+        SizedBox(height: screenHeight * 0.02),
+        const Text(
+          'Our call center is here to help you with any questions or issues regarding the national ID card process. Our dedicated team is available to assist you.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 16,
+          ),
+        ),
+      ],
     );
   }
 
@@ -159,6 +169,73 @@ class CallCenterPage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildRegionContacts() {
+    final List<Map<String, dynamic>> regions = [
+      {
+        'title': 'Useful Addresses',
+        'items': [
+          'Judicial Police Directorate (DPJ): 222 23 24 11',
+          'Special Operations Group (GSO): 222 30 65 15',
+          'Public Utility Number of DGSN: 1 500',
+          'Special Rapid Intervention Teams (ESIR): 117 or 17',
+          'Diplomats\' Security Company (CSD): 120',
+        ],
+      },
+      {
+        'title': 'CENTRE Region',
+        'items': [
+          'Regional Delegation of National Security: 222 23 26 53',
+          'Regional Division of Judicial Police: 222 23 04 22',
+        ],
+      },
+      {
+        'title': 'LITTORAL Region',
+        'items': [
+          'Regional Delegation of National Security: 233 42 78 14',
+          'Regional Division of Judicial Police: 233 42 01 36',
+        ],
+      },
+      {
+        'title': 'NORTHWEST Region',
+        'items': [
+          'Regional Delegation of National Security: 233 36 12 54',
+          'Regional Division of Judicial Police: 233 36 16 71',
+        ],
+      },
+      {
+        'title': 'SOUTHWEST Region',
+        'items': [
+          'Regional Delegation of National Security: 233 33 23 59',
+          'Regional Division of Judicial Police: 233 33 21 09',
+        ],
+      },
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: regions.map((region) {
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                region['title'],
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              ...region['items'].map((item) => ListTile(
+                title: Text(item),
+                contentPadding: EdgeInsets.zero,
+              )),
+              Divider(),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
