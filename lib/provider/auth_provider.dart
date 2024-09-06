@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../Services/auth_services.dart';
 
@@ -9,9 +11,15 @@ class AuthProvider with ChangeNotifier {
   String? get token => _token;
   String? get phone => _phone;
 
-  Future<void> signup(String name, String email, String password) async {
+  Future<void> signup(
+      String username,
+      String email,
+      String password,
+      String phone,
+      File? profileImage,
+      ) async {
     try {
-      await _authservices.signup(name, email, password);
+      await _authservices.signup(username, email, password, phone, profileImage);
       _token = null; // Or set the token if returned from the signup response
       notifyListeners();
     } catch (error) {

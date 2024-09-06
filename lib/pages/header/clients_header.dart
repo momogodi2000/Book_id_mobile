@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cni/pages/panel/clients/missing_doc/find_id.dart';
 import 'package:provider/provider.dart';
 import '../../Services/auth_services.dart';
+import '../../language/change_language.dart';
 import '../../provider/ThemeNotifier.dart';
 import '../panel/clients/abouts_us/abouts_us.dart';
 import '../panel/clients/communication/view_com.dart';
@@ -67,7 +68,7 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _settingsListTile(context, Icons.person, 'Profile', const ProfilePage()),
-                _settingsListTile(context, Icons.language, 'Language', const LanguageSelectionPage()),
+                _settingsListTile(context, Icons.language, 'Language',  ChangeLanguagePage()),
                 _settingsListTile(context, Icons.support_agent, 'Support', const SupportPage()),
                 _settingsListTile(context, Icons.logout, 'Log Out', const LogoutPage()),
               ],
@@ -141,14 +142,19 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
-
 class ClientDashboardDrawer extends StatelessWidget {
   const ClientDashboardDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authServices = Provider.of<Authservices>(context); // Get instance of Authservices
+    // Get instance of AuthService
+    final authService = Provider.of<Authservices>(context);
     double drawerWidth = MediaQuery.of(context).size.width * 0.75;
+
+    // Fetch user details if not fetched yet
+    if (authService.name == null || authService.profilePicture == null) {
+      authService.fetchUserDetails();
+    }
 
     return Drawer(
       child: Column(
@@ -249,11 +255,11 @@ class ClientDashboardDrawer extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: NetworkImage(authServices.profilePicture ?? 'https://example.com/default_avatar.png'), // Use instance
+                  backgroundImage: NetworkImage(authService.profilePicture ?? 'https://example.com/default_avatar.png'), // Use instance
                 ),
                 const SizedBox(width: 16),
                 Text(
-                  authServices.name ?? 'Loading...', // Use instance
+                  authService.name ?? 'Loading...', // Use instance
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -263,8 +269,6 @@ class ClientDashboardDrawer extends StatelessWidget {
       ),
     );
   }
-
-
 
   Widget _createDrawerItem({
     required IconData icon,

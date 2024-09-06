@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
 import '../../Services/auth_services.dart';
 import 'forgot_password_page.dart';
 import 'signin_page.dart';
@@ -14,17 +16,20 @@ class SignupPage extends StatefulWidget {
 
 class _SignupPageState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
-  String _name = '';
+  String _username = '';
   String _email = '';
   String _password = '';
-  String _confirmPassword = '';
+  String _phone = '';
+  File? _profileImage;
   bool _rememberMe = false;
+
+  final ImagePicker _picker = ImagePicker();
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final authServices = Provider.of<Authservices>(context, listen: false);
-      authServices.signup(_name, _email, _password).then((_) {
+      authServices.signup(_username, _email, _password, _phone, _profileImage).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User created successfully!')),
         );
@@ -36,6 +41,14 @@ class _SignupPageState extends State<SignupPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to create account: $error')),
         );
+      });
+    }
+  }
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
       });
     }
   }
@@ -111,7 +124,7 @@ class _SignupPageState extends State<SignupPage> {
                             _buildTextFormField(
                               label: 'Name',
                               obscureText: false,
-                              onSaved: (value) => _name = value!,
+                              onSaved: (value) => _username = value!,
                               validator: (value) {
                                 if (value!.isEmpty) {
                                   return 'Please enter your name';
@@ -135,6 +148,18 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                             const SizedBox(height: 16),
                             _buildTextFormField(
+                              label: 'Phone',
+                              obscureText: false,
+                              onSaved: (value) => _phone = value!,
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Please enter your phone number';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            _buildTextFormField(
                               label: 'Password',
                               obscureText: true,
                               onSaved: (value) => _password = value!,
@@ -143,20 +168,6 @@ class _SignupPageState extends State<SignupPage> {
                                   return 'Please enter your password';
                                 } else if (value.length < 6) {
                                   return 'Password must be at least 6 characters long';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            _buildTextFormField(
-                              label: 'Confirm Password',
-                              obscureText: true,
-                              onSaved: (value) => _confirmPassword = value!,
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Please confirm your password';
-                                } else if (value != _password) {
-                                  return 'Passwords do not match';
                                 }
                                 return null;
                               },
@@ -180,6 +191,7 @@ class _SignupPageState extends State<SignupPage> {
                                 ),
                               ],
                             ),
+                            _buildImagePicker(screenWidth, screenHeight),
                             Align(
                               alignment: Alignment.centerRight,
                               child: TextButton(
@@ -249,6 +261,35 @@ class _SignupPageState extends State<SignupPage> {
       obscureText: obscureText,
       onSaved: onSaved,
       validator: validator,
+    );
+  }
+
+  Widget _buildImagePicker(double screenWidth, double screenHeight) {
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        if (_profileImage != null)
+          CircleAvatar(
+            radius: 40,
+            backgroundImage: FileImage(_profileImage!),
+          ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.photo_library),
+              color: Colors.blue,
+              onPressed: () => _pickImage(ImageSource.gallery),
+            ),
+            IconButton(
+              icon: const Icon(Icons.camera_alt),
+              color: Colors.blue,
+              onPressed: () => _pickImage(ImageSource.camera),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

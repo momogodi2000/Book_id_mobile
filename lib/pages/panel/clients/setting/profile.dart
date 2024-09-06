@@ -30,32 +30,57 @@ class _ProfilePageState extends State<ProfilePage> {
     _nameController.text = authService.name ?? '';
     _emailController.text = authService.email ?? '';
     _profileImageUrl = authService.profilePicture ?? '';
-    setState(() {}); // Rebuild to reflect the fetched details
+    setState(() {}); // Rebuild to reflect fetched details
   }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera),
+              title: const Text('Camera'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: const Text('Gallery'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        );
+      },
+    );
 
-    if (pickedFile != null) {
-      setState(() {
-        _profileImageUrl = pickedFile.path;
-      });
+    if (source != null) {
+      final pickedFile = await picker.pickImage(source: source);
+
+      if (pickedFile != null) {
+        setState(() {
+          _profileImageUrl = pickedFile.path;
+        });
+      }
     }
   }
 
   Future<void> _saveChanges() async {
     final authService = Provider.of<Authservices>(context, listen: false);
     try {
-      int userId = authService.userId; // Ensure userId is available in Authservices
+      // Get user ID from AuthServices
+      int userId = await authService.getCurrentUserId(); // Ensure userId is fetched
 
       await authService.updateProfile(
-        userId,
+
         _nameController.text,
         _emailController.text,
         _passwordController.text,
-        _profileImageUrl,
+        _profileImageUrl, // Ensure this is the correct file path
       );
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Changes saved successfully!')),
       );
@@ -84,7 +109,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   CircleAvatar(
                     radius: 50,
                     backgroundImage: _profileImageUrl.isEmpty
-                        ? const AssetImage('assets/images/default_avatar.png') // Default image
+                        ? const AssetImage('assets/images/yvan.jpg') // Default image
                         : FileImage(File(_profileImageUrl)) as ImageProvider,
                   ),
                   Positioned(

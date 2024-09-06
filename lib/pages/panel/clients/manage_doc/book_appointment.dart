@@ -20,6 +20,8 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
   AnimationController? _controller;
   Animation<double>? _fadeAnimation;
 
+  final TextEditingController _officeController = TextEditingController(); // Office input controller
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +39,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
   @override
   void dispose() {
     _controller?.dispose();
+    _officeController.dispose(); // Dispose of the controller
     super.dispose();
   }
 
@@ -77,7 +80,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
         date: _selectedDate,
         time: _formatTime(_selectedTime),
         userId: userId,
-
+        office: _officeController.text, // Pass the office value
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -162,6 +165,11 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
                 child: Text("Select Time: ${_formatTime(_selectedTime)}"),
               ),
               const SizedBox(height: 20.0),
+              TextField(
+                controller: _officeController,
+                decoration: const InputDecoration(labelText: 'Office'), // Office input field
+              ),
+              const SizedBox(height: 20.0),
               Center(
                 child: ElevatedButton(
                   onPressed: _submitBooking,
@@ -176,7 +184,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage>
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Text(
-                    "Please ensure that you select a valid date and time for booking your national ID card.",
+                    "Please ensure that you select a valid date, time, and office for booking your national ID card.",
                     style: TextStyle(color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),

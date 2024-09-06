@@ -1,43 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class ReceiptPage extends StatelessWidget {
-  const ReceiptPage({super.key});
+  final Map<String, dynamic> paymentData;
+
+  const ReceiptPage({Key? key, required this.paymentData}) : super(key: key);
+
+  Future<void> _generatePdf() async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Payment Receipt',
+                style: pw.TextStyle(fontSize: 30, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.SizedBox(height: 20),
+              ...paymentData.entries.map((entry) {
+                return pw.Text(
+                  '${entry.key}: ${entry.value}',
+                  style: const pw.TextStyle(fontSize: 12),
+                );
+              }).toList(),
+            ],
+          );
+        },
+      ),
+    );
+
+    // Save and share the PDF
+    await Printing.sharePdf(bytes: await pdf.save(), filename: 'payment_receipt.pdf');
+  }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Receipt"),
-        backgroundColor: Colors.blue,
+        title: const Text("Payment Receipt"),
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: size.width * 0.05,
-          vertical: size.height * 0.03,
-        ),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "Payment Receipt",
-              style: TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
-              ),
+              "Payment Details",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 20.0),
-            // Add receipt details here
-            Text(
-              "Thank you for your payment. Your transaction has been successfully processed.",
-              style: TextStyle(
-                fontSize: 16.0,
-                color: Colors.black54,
-              ),
+            const SizedBox(height: 20),
+            ...paymentData.entries.map((entry) {
+              return Text(
+                "${entry.key}: ${entry.value}",
+                style: const TextStyle(fontSize: 16),
+              );
+            }).toList(),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _generatePdf,
+              child: const Text("Download Receipt as PDF"),
             ),
-            // You can add more details or options for downloading the receipt
           ],
         ),
       ),

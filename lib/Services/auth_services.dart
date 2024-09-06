@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
-
-
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 class Authservices with ChangeNotifier {
   // Base URL of the Django backend
@@ -30,27 +29,47 @@ class Authservices with ChangeNotifier {
 
 
 
-  Future<void> signup(String name, String email, String password) async {
+
+  Future<void> signup(
+      String username,
+      String email,
+      String password,
+      String phone,
+      File? profilePicture,
+      ) async {
     final url = Uri.parse('$baseUrl/register/');
     try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'name': name,
-          'email': email,
-          'password': password,
-        }),
-      );
+      var request = http.MultipartRequest('POST', url)
+        ..fields['username'] = username
+        ..fields['email'] = email
+        ..fields['password'] = password
+        ..fields['phone'] = phone;
+
+      if (profilePicture != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'profile_picture',
+            profilePicture.path,
+          ),
+        );
+      }
+
+      final response = await request.send();
+      final responseData = await response.stream.bytesToString();
+
       if (response.statusCode == 201) {
-        notifyListeners();
+        print('Signup successful: $responseData');
       } else {
-        throw Exception('Failed to sign up');
+        print('Error response: $responseData');
+        throw Exception('Failed to create account: ${json.decode(responseData)['errors'] ?? 'Unknown error'}');
       }
     } catch (error) {
-      throw error;
+      print('Error signing up: $error');
+      throw Exception('Error signing up: $error');
     }
   }
+
+
 
   Future<void> signin(String email, String password, BuildContext context) async {
     final url = Uri.parse('$baseUrl/login/');
@@ -67,6 +86,7 @@ class Authservices with ChangeNotifier {
         final responseData = json.decode(response.body);
         _token = responseData['token'];
         String userRole = responseData['data']['role'];
+        await saveUserId(responseData['data']['id']);
         _redirectBasedOnRole(userRole, context);
         notifyListeners();
       } else if (response.statusCode == 400) {
@@ -272,6 +292,7 @@ class Authservices with ChangeNotifier {
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
+        print(response.body);
         final data = json.decode(response.body);
         return data['data']; // Adjust based on your API response
       } else {
@@ -282,31 +303,28 @@ class Authservices with ChangeNotifier {
     }
   }
 
+
   Future<void> fetchUserDetails() async {
-    final url = Uri.parse('$baseUrl/user/');
+    final userId = await getCurrentUserId(); // Get current user ID
+    final url = Uri.parse('$baseUrl/user/$userId/'); // Updated endpoint to include user ID
+
     try {
       final response = await http.get(
         url,
         headers: {
           'Authorization': 'Bearer $_token',
+          'Content-Type': 'application/json',
         },
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        _userId = data['data']['id']; // Set the user ID here
-        _name = data['data']['name'] ?? 'Unknown User';
-        _profilePicture = data['data']['profile_picture'] ?? 'https://example.com/default_avatar.png';
-        notifyListeners();
+        _userId = data['id']; // Extract user ID from response
+        _name = data['name'] ?? 'Unknown User';
+        _profilePicture = data['profile_picture'] ?? 'https://assets/imsge/yvan.jpg';
+        notifyListeners(); // Notify listeners of the change
       } else {
-        switch (response.statusCode) {
-          case 401:
-            throw Exception('Unauthorized access. Please log in again.');
-          case 404:
-            throw Exception('User not found.');
-          default:
-            throw Exception('Failed to load user details. Status code: ${response.statusCode}');
-        }
+        _handleHttpError(response.statusCode);
       }
     } catch (error) {
       print('Error fetching user details: $error');
@@ -315,43 +333,60 @@ class Authservices with ChangeNotifier {
   }
 
 
-
-  int get userId {
-    if (_userId != null) {
-      return _userId!;
-    } else {
-      throw Exception('User ID is not available.');
+  void _handleHttpError(int statusCode) {
+    switch (statusCode) {
+      case 401:
+        throw Exception('Unauthorized access. Please log in again.');
+      case 404:
+        throw Exception('User not found.');
+      default:
+        throw Exception('Failed to load user details. Status code: $statusCode');
     }
   }
 
-  void setUserId(int id) {
-    _userId = id;
-  }
 
-  Future<void> updateProfile(int userId, String name, String email, String password, String profilePicture) async {
-    final url = Uri.parse('$baseUrl/api/user/$userId/'); // Ensure correct URL
+
+
+
+
+  Future<void> updateProfile(String name, String email, String password, String profilePicture) async {
+    final userId = await getCurrentUserId(); // Get current user ID
+    final url = Uri.parse('$baseUrl/user/$userId/'); // Ensure correct URL
+
     try {
-      final response = await http.put(
-        url,
-        headers: {
+      var request = http.MultipartRequest('PUT', url)
+        ..headers.addAll({
           'Authorization': 'Bearer $_token', // Ensure token is included
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'name': name,
-          'email': email,
-          'password': password, // Handle password securely
-          'profile_picture': profilePicture, // Image handling should be managed separately
-        }),
-      );
+        })
+        ..fields['name'] = name
+        ..fields['email'] = email;
+
+      if (password.isNotEmpty) {
+        request.fields['password'] = password; // Handle password securely
+      }
+
+      // Check if profilePicture is provided and add it to the request
+      if (profilePicture.isNotEmpty) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'profile_picture',
+          profilePicture,
+        ));
+      }
+
+      // Send the request
+      final response = await request.send();
 
       if (response.statusCode == 200) {
-        _name = name;
-        _email = email;
-        _profilePicture = profilePicture; // Update local state
+        // Process the response
+        final responseData = await http.Response.fromStream(response);
+        final data = json.decode(responseData.body);
+
+        _name = data['name'];
+        _email = data['email'];
+        _profilePicture = data['profile_picture']; // Update local state
         notifyListeners();
       } else {
-        throw Exception('Failed to update profile: ${response.body}');
+        throw Exception('Failed to update profile: ${response.reasonPhrase}');
       }
     } catch (error) {
       throw error;
@@ -387,27 +422,39 @@ class Authservices with ChangeNotifier {
     }
   }
 
+// near by police
   Future<List<dynamic>> fetchPoliceStations(double lat, double lng) async {
     final url = Uri.parse('$baseUrl/nearby-police-stations/');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'latitude': lat, 'longitude': lng}),
-    );
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'latitude': lat, 'longitude': lng}),
+      );
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body)['police_stations'];
-    } else {
-      throw Exception('Failed to load police stations');
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseBody = json.decode(response.body);
+        if (responseBody.containsKey('police_stations')) {
+          return responseBody['police_stations'];
+        } else {
+          throw Exception('Invalid response format');
+        }
+      } else {
+        throw Exception('Failed to load police stations: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Handle or log the error
+      throw Exception('Failed to fetch police stations: $error');
     }
   }
 
 
 
 
-  Future<void> uploadDocuments(Map<String, File?> documents, String userId) async {
+  Future<void> uploadDocuments(Map<String, File?> documents) async {
     final uri = Uri.parse('$baseUrl/documents/');
     final request = http.MultipartRequest('POST', uri);
+    final userId = (await getCurrentUserId()).toString();
 
     request.fields['user'] = userId;
 
@@ -431,6 +478,7 @@ class Authservices with ChangeNotifier {
   }
 
 
+
   // Method to save user ID (this should be called after login)
   Future<void> saveUserId(int userId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -451,58 +499,70 @@ class Authservices with ChangeNotifier {
 
 
 
-
+// book appointment
   Future<void> bookAppointment({
     required DateTime date,
     required String time,
     required int userId,
-
+    required String office, // Add the 'office' field
   }) async {
     final url = Uri.parse('$baseUrl/appointments/get-add/');
-    try {
-      final response = await http.post(
-          url,
-          headers: {
-            'Content-Type': 'application/json',
-            // 'Authorization': 'Bearer $_token', // Uncomment if using token
-          },
-          body: json.encode({
-            'date': date.toIso8601String(),
-            'time': time,
-            'user': userId,
 
-          }),
-          );
-      if (response.statusCode != 200) {
-        throw Exception('Failed to book appointment: ${response.body}');
-      }
-    } catch (error) {
-  throw error;
-  }
-}
+    // Format the date to YYYY-MM-DD
+    String formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
-
-  Future<Map<String, dynamic>> submitPayment(String phone, String userId) async {
-    final url = Uri.parse('$baseUrl/payments/');
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': 'Bearer $_token', // Uncomment if using token
+        },
         body: json.encode({
-          'phone': phone,
-          'user': userId,
+          'date': formattedDate, // Correctly formatted date
+          'time': time,          // Correct time format
+          'user': userId,        // User ID
+          'office': office,      // Add the 'office' field
         }),
       );
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        throw Exception('Failed to process payment');
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to book appointment: ${response.body}');
       }
     } catch (error) {
       throw error;
     }
   }
 
+
+// Make payment for user
+  Future<Map<String, dynamic>> submitPayment(String phone) async {
+    // Validate the phone number format here if necessary
+    final url = Uri.parse('$baseUrl/payments/');
+    final userId = (await getCurrentUserId()).toString();
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'phone': phone,  // Ensure valid phone number format
+          'user': {'id': userId},
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        final errorResponse = response.body.isNotEmpty
+            ? json.decode(response.body)
+            : {'message': 'Unknown error occurred'};
+        throw Exception('Payment failed: ${errorResponse['message']}');
+      }
+    } catch (error) {
+      throw Exception('An error occurred during payment: $error');
+    }
+  }
 
 }
 

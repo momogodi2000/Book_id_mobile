@@ -20,10 +20,10 @@ class _UploadDocPageState extends State<UploadDocPage> with SingleTickerProvider
   final List<String> _documentNames = [
     "Birth Certificate",
     "Proof of Nationality",
-    "Passport Photos",
+    "Criminal Record Extract",
     "Residence Permit",
     "Marriage Certificate",
-    "Death Certificate",
+    "Worker / Students ",
   ];
 
   late AnimationController _controller;
@@ -67,18 +67,18 @@ class _UploadDocPageState extends State<UploadDocPage> with SingleTickerProvider
   Future<void> _submitDocuments() async {
     if (_validateFiles()) {
       final authService = Provider.of<Authservices>(context, listen: false);
-      try {
-        final userId = (await authService.getCurrentUserId()).toString(); // Convert to String
-
+      try {// Convert to String
+        //final userId = (await authService.getCurrentUserId()).toString();
         final documentsMap = {
           'birth_certificate': _documents[0],
           'proof_of_nationality': _documents[1],
-          'criminal_record_extract': _documents[2],
+          'passport_photos': _documents[2],
           'residence_permit': _documents[3],
           'marriage_certificate': _documents[4],
+          'death_certificate': _documents[5],
         };
 
-        await authService.uploadDocuments(documentsMap, userId);
+        await authService.uploadDocuments(documentsMap);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

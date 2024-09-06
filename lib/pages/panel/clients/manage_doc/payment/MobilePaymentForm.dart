@@ -19,12 +19,12 @@ class MobilePaymentForm extends StatefulWidget {
 
 class _MobilePaymentFormState extends State<MobilePaymentForm> {
   final _formKey = GlobalKey<FormState>();
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    // Initialize the mobile controller with the default code +237
-    widget.mobileController.text = '+237';
+    widget.mobileController.text = '';  // Initialize empty
   }
 
   Future<void> _submitPayment() async {
@@ -32,29 +32,47 @@ class _MobilePaymentFormState extends State<MobilePaymentForm> {
       return;
     }
 
-    // Handle payment submission
+    setState(() {
+      _isSubmitting = true;  // Set loading state
+    });
+
     try {
       final authService = Provider.of<Authservices>(context, listen: false);
-      final phone = widget.mobileController.text;
-      final userId = "user-id"; // Replace with actual user ID or handle accordingly
+      final phone = widget.mobileController.text; // Phone number without country code
+      final userId = (await authService.getCurrentUserId()).toString();  // Get actual user ID
 
-      await authService.submitPayment(phone, userId);
+      // Submit payment via the auth service
+      final response = await authService.submitPayment(phone);  // Send phone number only
 
-      // If payment is successful, show a success message and redirect to ReceiptPage
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Payment submitted successfully!")),
-      );
-
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const ReceiptPage()),
+      // Check if payment was successful
+      if (response['status'] == 'SUCCESSFUL') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Payment successful! Reference: ${response['reference']}")),
         );
-      });
+
+        // Redirect to ReceiptPage with payment details
+        Future.delayed(const Duration(seconds: 1), () {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => ReceiptPage(paymentData: response),
+            ),
+          );
+        });
+      } else {
+        // Handle payment failure
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Payment failed: ${response['message']}")),
+        );
+      }
     } catch (error) {
-      // Show an error message if payment submission fails
+      // Handle any errors during the payment process
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("An error occurred during payment")),
+        SnackBar(content: Text("An error occurred during payment: $error")),
       );
+    } finally {
+      setState(() {
+        _isSubmitting = false;  // Reset loading state
+      });
     }
   }
 
@@ -78,7 +96,7 @@ class _MobilePaymentFormState extends State<MobilePaymentForm> {
               const Text(
                 "Mobile Payment",
                 style: TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 24.0,
                   fontWeight: FontWeight.bold,
                   color: Colors.blueAccent,
                 ),
@@ -87,6 +105,7 @@ class _MobilePaymentFormState extends State<MobilePaymentForm> {
               TextFormField(
                 controller: widget.mobileController,
                 keyboardType: TextInputType.phone,
+                maxLength: 9,  // Limit to 9 digits
                 decoration: InputDecoration(
                   labelText: "Mobile Phone Number",
                   border: OutlineInputBorder(
@@ -94,23 +113,26 @@ class _MobilePaymentFormState extends State<MobilePaymentForm> {
                   ),
                   filled: true,
                   fillColor: Colors.teal.shade50,
+                  counterText: '',  // Hide the counter text
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Please enter your mobile phone number";
                   }
-                  // Validate that the phone number starts with '6' and is 9 digits long
-                  if (!RegExp(r'^\+2376\d{8}$').hasMatch(value)) {
-                    return "Please enter a valid phone number starting with 6";
+                  if (!RegExp(r'^\d{9}$').hasMatch(value)) {
+                    return "Please enter a valid 9-digit phone number";
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 20.0),
-              ElevatedButton(
-                onPressed: _submitPayment,
-                child: Text("Submit Payment"),
-              ),
+              if (_isSubmitting)
+                const Center(child: CircularProgressIndicator())
+              else
+                ElevatedButton(
+                  onPressed: _submitPayment,
+                  child: Text("Submit Payment"),
+                ),
             ],
           ),
         ),

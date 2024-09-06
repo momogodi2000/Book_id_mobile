@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../reciept.dart';
 
 class PaypalPaymentForm extends StatelessWidget {
@@ -37,7 +36,7 @@ class PaypalPaymentForm extends StatelessWidget {
       );
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const ReceiptPage()),
+        MaterialPageRoute(builder: (context) => const ReceiptPage(paymentData: {},)),
       );
     }
 

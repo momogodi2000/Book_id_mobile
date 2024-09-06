@@ -1,16 +1,69 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:carousel_slider/carousel_slider.dart';
 
-class ClientsAnimation extends StatelessWidget {
-  final Set<Marker> markers;
-  final bool isLoading;
+class ClientsAnimation extends StatefulWidget {
+  const ClientsAnimation({Key? key, required bool isLoading, required Set<Marker> markers}) : super(key: key);
 
-  const ClientsAnimation({
-    Key? key,
-    required this.markers,
-    required this.isLoading,
-  }) : super(key: key);
+  @override
+  _ClientsAnimationState createState() => _ClientsAnimationState();
+}
+
+class _ClientsAnimationState extends State<ClientsAnimation> {
+  final Set<Marker> _markers = {};
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPoliceStations();
+  }
+
+  Future<void> _fetchPoliceStations() async {
+    final latitude = 3.848; // Replace with actual latitude
+    final longitude = 11.5021; // Replace with actual longitude
+    final url = Uri.parse('http://your-api-url/api/nearby-police-stations/');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'latitude': latitude, 'longitude': longitude}),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> policeStations = json.decode(response.body)['police_stations'];
+        setState(() {
+          _isLoading = false;
+          _markers.clear();
+          for (var station in policeStations) {
+            _markers.add(
+              Marker(
+                markerId: MarkerId(station['name']),
+                position: LatLng(station['latitude'], station['longitude']),
+                infoWindow: InfoWindow(
+                  title: station['name'],
+                  snippet: station['address'],
+                ),
+              ),
+            );
+          }
+        });
+      } else {
+        throw Exception('Failed to load police stations');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      // Handle the error (e.g., show a snackbar)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load police stations: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,14 +173,14 @@ class ClientsAnimation extends StatelessWidget {
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           height: isMobile ? 300 : 400,
-          child: isLoading
+          child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : GoogleMap(
             initialCameraPosition: const CameraPosition(
               target: LatLng(3.848, 11.5021),
               zoom: 6,
             ),
-            markers: markers,
+            markers: _markers,
           ),
         ),
       ],

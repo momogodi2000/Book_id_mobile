@@ -117,7 +117,7 @@ class _CommunicationPageState extends State<CommunicationPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Image.network(
-                      communication['location'], // Use network image for file URL
+                      "http://192.168.100.5:8000/"+communication['location'], // Use network image for file URL
                       width: screenWidth,
                       height: screenHeight * 0.25,
                       fit: BoxFit.cover,
