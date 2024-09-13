@@ -5,6 +5,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/police_models/User_models.dart';
+import '../models/police_models/appointment.dart';
+import '../models/police_models/missing_id_card.dart';
 
 
 class Authservices with ChangeNotifier {
@@ -287,6 +290,39 @@ class Authservices with ChangeNotifier {
     }
   }
 
+
+  // Method to delete an ID card
+  Future<void> deleteIDCard(String id) async {
+    final url = Uri.parse('$baseUrl/missing-cards/$id/'); // Endpoint for deleting the ID card
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any authentication headers if required, e.g., 'Authorization': 'Bearer your_token',
+        },
+      );
+
+      if (response.statusCode == 204) {
+        // Successfully deleted the ID card
+        print('ID card deleted successfully');
+      } else if (response.statusCode == 404) {
+        // ID card not found
+        print('ID card not found');
+      } else {
+        // Handle other status codes
+        print('Failed to delete ID card: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error deleting ID card: $error');
+      throw error; // Re-throw the error to handle it in the UI if needed
+    }
+  }
+
+
+
+
   Future<List<dynamic>> fetchCommunications() async {
     final url = Uri.parse('$baseUrl/communications/'); // Adjust endpoint as needed
     try {
@@ -302,6 +338,73 @@ class Authservices with ChangeNotifier {
       throw error;
     }
   }
+
+  // Add new communication
+  Future<void> addCommunication(String title, String filePath) async {
+    final url = Uri.parse('$baseUrl/communications/');
+    var request = http.MultipartRequest('POST', url);
+    try {
+      request.fields['title'] = title;
+      request.files.add(await http.MultipartFile.fromPath('file', filePath));
+
+      final response = await request.send();
+      if (response.statusCode == 201) {
+        print("Communication added successfully");
+      } else {
+        throw Exception('Failed to add communication');
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+// Edit communication
+  Future<void> editCommunication(int id, String title, String filePath) async {
+    final url = Uri.parse('$baseUrl/communications/$id/');
+    var request = http.MultipartRequest('PUT', url);
+    try {
+      request.fields['title'] = title;
+      request.files.add(await http.MultipartFile.fromPath('file', filePath));
+
+      final response = await request.send();
+      if (response.statusCode == 201) {
+        print("Communication edited successfully");
+      } else {
+        throw Exception('Failed to edit communication');
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+// Delete communication
+  Future<void> deleteCommunication(int id) async {
+    final url = Uri.parse('$baseUrl/communications/$id/');
+    try {
+      final response = await http.delete(url);
+      if (response.statusCode == 200) {
+        print("Communication deleted successfully");
+      } else {
+        throw Exception('Failed to delete communication');
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   Future<void> fetchUserDetails() async {
@@ -343,8 +446,6 @@ class Authservices with ChangeNotifier {
         throw Exception('Failed to load user details. Status code: $statusCode');
     }
   }
-
-
 
 
 
@@ -563,6 +664,118 @@ class Authservices with ChangeNotifier {
       throw Exception('An error occurred during payment: $error');
     }
   }
+
+
+  // police panel
+
+  Future<List<dynamic>> fetchContactUsMessages() async {
+    final url = Uri.parse('$baseUrl/contact-us/');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return responseData['data']; // Assuming the data is in the 'data' field
+      } else {
+        throw Exception('Failed to load contact us messages');
+      }
+    } catch (error) {
+      print('Error fetching contact us messages: $error');
+      throw error;
+    }
+  }
+
+
+  Future<void> deleteContactUsMessage(int id) async {
+    final url = Uri.parse('$baseUrl/contact-us/$id/delete/');
+    try {
+      final response = await http.delete(url);
+      if (response.statusCode == 204) {
+        notifyListeners();
+      } else {
+        throw Exception('Failed to delete contact us message');
+      }
+    } catch (error) {
+      print('Error deleting contact us message: $error');
+      throw error;
+    }
+  }
+
+
+  Future<void> replyToContactUsMessage(int id, String replyMessage) async {
+    final url = Uri.parse('$baseUrl/contact-us/$id/reply/');
+    try {
+      final response = await http.post(
+        url,
+        body: {
+          'reply_message': replyMessage,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Handle success, e.g., notifyListeners() if necessary
+        print('Reply sent successfully!');
+      } else if (response.statusCode == 400) {
+        // Handle bad request, such as empty reply message
+        print('Failed to send reply: ${response.body}');
+        throw Exception('Failed to send reply: Bad request');
+      } else if (response.statusCode == 404) {
+        // Handle case where the contact us message was not found
+        print('Failed to send reply: Message not found');
+        throw Exception('Failed to send reply: Message not found');
+      } else {
+        // Handle other unexpected status codes
+        print('Failed to send reply: Unexpected error');
+        throw Exception('Failed to send reply: Unexpected error');
+      }
+    } catch (error) {
+      print('Error sending reply: $error');
+      throw error;
+    }
+  }
+
+
+  Future<List<User>> fetchUsers() async {
+    final url = Uri.parse('$baseUrl/user/get-add/');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body)['data'];
+        final List<User> users = data.map((json) => User.fromJson(json)).toList();
+        return users; // Returning the list of users
+      } else {
+        throw Exception('Failed to fetch users');
+      }
+    } catch (error) {
+      print('Error fetching users: $error');
+      throw error;
+    }
+  }
+
+
+    Future<List<Appointment>> fetchAppointments() async {
+    final response = await http.get(Uri.parse('$baseUrl/get-add/'));
+    if (response.statusCode == 200) {
+    List<dynamic> body = json.decode(response.body)['data'];
+    return body.map((json) => Appointment.fromJson(json)).toList();
+    } else {
+    throw Exception('Failed to load appointments');
+    }
+    }
+
+    Future<bool> takeAction(int appointmentId, String action, String message) async {
+    final url = Uri.parse('$baseUrl/edit-delete/$appointmentId/');
+    final response = await http.put(
+    url,
+    body: jsonEncode({"response": action, "message": message}),
+    headers: {"Content-Type": "application/json"},
+    );
+    return response.statusCode == 200;
+    }
+
+
+
 
 }
 

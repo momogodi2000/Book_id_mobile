@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
-
-import '../panel/police/communication/add_com.dart';
+import 'package:provider/provider.dart';
+import '../../Services/auth_services.dart';
+import '../../language/change_language.dart';
+import '../../provider/ThemeNotifier.dart';
+import '../panel/police/communication/view_com.dart';
+import '../panel/police/manage_appointment/Appointments_list.dart';
+import '../panel/police/missing_doc/find_id.dart';
+import '../panel/clients/missing_doc/upload_id.dart';
+import '../panel/clients/setting/logout.dart';
+import '../panel/clients/setting/profile.dart';
+import '../panel/clients/setting/support.dart';
 import '../panel/police/contact/contact_us_management.dart';
 import '../panel/police/manage_appointment/validation.dart';
-import '../panel/police/manage_missing/ViewIdCardsPage.dart';
+import '../panel/police/police_panel.dart';
+import '../panel/police/user/User_information.dart';
 
 class PoliceHeaderPage extends StatelessWidget implements PreferredSizeWidget {
   const PoliceHeaderPage({super.key});
 
+
   @override
   Widget build(BuildContext context) {
-    double appBarHeight = MediaQuery.of(context).size.height * 0.1; // Adjust height as needed
+    double appBarHeight = MediaQuery.of(context).size.height * 0.1;
 
     return AppBar(
       backgroundColor: Colors.white,
@@ -18,9 +29,7 @@ class PoliceHeaderPage extends StatelessWidget implements PreferredSizeWidget {
       leading: Builder(
         builder: (context) => IconButton(
           icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
+          onPressed: () => Scaffold.of(context).openDrawer(),
         ),
       ),
       actions: [
@@ -31,222 +40,122 @@ class PoliceHeaderPage extends StatelessWidget implements PreferredSizeWidget {
           },
         ),
         IconButton(
-          icon: const Icon(Icons.wb_sunny_outlined, color: Colors.black),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('Theme Settings'),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.brightness_2, color: Colors.black),
-                          title: const Text('Dark'),
-                          onTap: () {
-                            // Handle dark theme selection
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.brightness_7, color: Colors.black),
-                          title: const Text('Light'),
-                          onTap: () {
-                            // Handle light theme selection
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.settings_brightness, color: Colors.black),
-                          title: const Text('Default'),
-                          onTap: () {
-                            // Handle default theme selection
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Close'),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
+          icon: const Icon(Icons.settings, color: Colors.black),
+          onPressed: () => _showSettingsDialog(context),
         ),
         IconButton(
-          icon: const Icon(Icons.settings, color: Colors.black),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('Settings'),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.person),
-                          title: const Text('Profile'),
-                          onTap: () {
-                            Navigator.of(context).pop(); // Close the dialog first
-                            // Handle navigation to ProfilePage
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.settings),
-                          title: const Text('Settings'),
-                          onTap: () {
-                            // Handle settings
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.support_agent),
-                          title: const Text('Support'),
-                          onTap: () {
-                            Navigator.of(context).pop(); // Close the dialog first
-                            // Handle navigation to SupportPage
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.logout),
-                          title: const Text('Logout'),
-                          onTap: () {
-                            // Handle Logout
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Close'),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
+          icon: const Icon(Icons.wb_sunny_outlined, color: Colors.black),
+          onPressed: () => _showThemeSettingsDialog(context),
         ),
       ],
-      toolbarHeight: appBarHeight, // Set AppBar height
+      toolbarHeight: appBarHeight,
     );
   }
+
+  void _showSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Settings'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _settingsListTile(context, Icons.person, 'Profile', const ProfilePage()),
+                _settingsListTile(context, Icons.language, 'Language',  ChangeLanguagePage()),
+                _settingsListTile(context, Icons.support_agent, 'Support', const SupportPage()),
+                _settingsListTile(context, Icons.logout, 'Log Out', const LogoutPage()),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  ListTile _settingsListTile(BuildContext context, IconData icon, String title, Widget? page, {bool isLogout = false}) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: () {
+        if (isLogout) {
+          Authservices().logout();
+          Navigator.of(context).pop();
+        } else if (page != null) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+        }
+      },
+    );
+  }
+
+  void _showThemeSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Theme Settings'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _themeListTile(context, Icons.brightness_2, 'Dark', (themeNotifier) => themeNotifier.setDarkTheme()),
+                _themeListTile(context, Icons.brightness_7, 'Light', (themeNotifier) => themeNotifier.setLightTheme()),
+                _themeListTile(context, Icons.settings_brightness, 'Default', (themeNotifier) => themeNotifier.setDefaultTheme()),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  ListTile _themeListTile(BuildContext context, IconData icon, String title, Function(ThemeNotifier) onTap) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: () {
+        final themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
+        onTap(themeNotifier);
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+
+
+
+
+
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
-// Drawer for Police Dashboard
 class PoliceDashboardDrawer extends StatelessWidget {
   const PoliceDashboardDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    double drawerWidth = MediaQuery.of(context).size.width * 0.75;
     return Drawer(
       child: Column(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blueGrey,
-            ),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Police Dashboard',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
+          _buildDrawerHeader(),
           Expanded(
             child: ListView(
-              children: [
-                _createDrawerItem(
-                  icon: Icons.event_available,
-                  text: 'Manage Appointments',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) =>  ValidationPage()),
-                    );
-                  },
-                ),
-                _createDrawerItem(
-                  icon: Icons.event_available,
-                  text: 'Manage Missing_id Card',
-                  onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ViewIdCardsPage()),
-                  );
-                },
-                ),
-                _createDrawerItem(
-                  icon: Icons.person_search,
-                  text: 'User Information',
-                  onTap: () {
-                    // Handle user information
-                  },
-                ),
-                _createDrawerItem(
-                  icon: Icons.contact_mail,
-                  text: 'Manger_contact_us',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ContactUsManagementPage()),
-                    );
-                  },
-                ),
-
-                _createDrawerItem(
-                  icon: Icons.settings,
-                  text: 'Settings',
-                  onTap: () {
-                    // Handle settings
-                  },
-                ),
-                _createDrawerItemWithDropdown(
-                  icon: Icons.public,
-                  text: 'Publication',
-                  dropdownItems: [
-                    _createDropdownItem(
-                      icon: Icons.note,
-                      text: 'Note',
-                      onTap: () {
-                        // Handle note
-                      },
-                    ),
-                    _createDropdownItem(
-                      icon: Icons.message,
-                      text: 'Communication',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AddComPage()),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
+              children: _buildDrawerItems(context),
             ),
           ),
         ],
@@ -254,26 +163,59 @@ class PoliceDashboardDrawer extends StatelessWidget {
     );
   }
 
-  Widget _createDrawerItem({required IconData icon, required String text, GestureTapCallback? onTap}) {
-    return ListTile(
-      title: Row(
-        children: <Widget>[
-          Icon(icon),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(text),
-          )
-        ],
+  UserAccountsDrawerHeader _buildDrawerHeader() {
+    return UserAccountsDrawerHeader(
+      accountName: Text('John'),
+      accountEmail: Text('john@example.com'),
+      currentAccountPicture: CircleAvatar(
+        backgroundColor: Colors.blueGrey,
+        backgroundImage: AssetImage('assets/images/yvan.jpg'),
       ),
+      decoration: BoxDecoration(color: Colors.blueGrey),
+    );
+  }
+
+  List<Widget> _buildDrawerItems(BuildContext context) {
+    return [
+      _createDrawerItem(context, Icons.dashboard, 'Dashboard', () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => PolicePanelPage()));
+      }),
+      _createDrawerItem(context, Icons.calendar_today, 'Manage Appointments', () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) =>AppointmentsPage()));
+      }),
+      _createDrawerItem(context, Icons.card_membership, 'Manage Missing ID Card', () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const FindIDPage()));
+      }),
+      _createDrawerItem(context, Icons.person, 'User Information', () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => UserPage()));
+
+      }),
+      _createDrawerItem(context, Icons.contact_support, 'Contact Us', () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) =>  ContactUsPage()));
+      }),
+      _createDrawerItem(context, Icons.card_giftcard, 'Card Availability', () {
+        // Handle card availability
+      }),
+      _createDrawerItemWithDropdown(context, Icons.public, 'Publication', [
+        _createDropdownItem(context, Icons.note, 'Note', () {
+          // Handle note
+        }),
+        _createDropdownItem(context, Icons.message, 'Communication', () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunicationPage()));
+        }),
+      ]),
+    ];
+  }
+
+  Widget _createDrawerItem(BuildContext context, IconData icon, String text, GestureTapCallback onTap) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(text),
       onTap: onTap,
     );
   }
 
-  Widget _createDrawerItemWithDropdown({
-    required IconData icon,
-    required String text,
-    required List<Widget> dropdownItems,
-  }) {
+  Widget _createDrawerItemWithDropdown(BuildContext context, IconData icon, String text, List<Widget> dropdownItems) {
     return ExpansionTile(
       leading: Icon(icon),
       title: Text(text),
@@ -281,34 +223,11 @@ class PoliceDashboardDrawer extends StatelessWidget {
     );
   }
 
-  Widget _createDropdownItem({required IconData icon, required String text, GestureTapCallback? onTap}) {
+  Widget _createDropdownItem(BuildContext context, IconData icon, String text, GestureTapCallback onTap) {
     return ListTile(
-      title: Row(
-        children: <Widget>[
-          Icon(icon, size: 18),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(text),
-          )
-        ],
-      ),
+      leading: Icon(icon, size: 18),
+      title: Text(text),
       onTap: onTap,
-    );
-  }
-}
-
-// Main Scaffold Widget with Header and Drawer
-class PoliceMainPage extends StatelessWidget {
-  const PoliceMainPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: PoliceHeaderPage(),
-      drawer: PoliceDashboardDrawer(),
-      body: Center(
-        child: Text('Police Dashboard Main Content Area'),
-      ),
     );
   }
 }

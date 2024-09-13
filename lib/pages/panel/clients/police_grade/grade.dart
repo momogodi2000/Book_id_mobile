@@ -31,61 +31,51 @@ class PoliceOfficerGradesPage extends StatelessWidget {
         'title': 'National Police',
         'image': 'assets/images/national_police.jpeg',
         'description': 'Responsible for maintaining public order and safety in urban areas.',
-        'route': '/view_detail/national_police',
       },
       {
         'title': 'Judicial Police',
         'image': 'assets/images/judicial_police.jpeg',
         'description': 'Handles criminal investigations and supports the judicial system.',
-        'route': '/view_detail/judicial_police',
       },
       {
         'title': 'National Gendarmerie',
         'image': 'assets/images/gendarmerie.jpeg',
         'description': 'A paramilitary force with both military and police duties.',
-        'route': '/view_detail/gendarmerie',
       },
       {
         'title': 'Assistant Police',
         'image': 'assets/images/assistant.jpeg',
         'description': 'Supervises a team of Police Officers.',
-        'route': '/view_detail/assistant',
       },
       {
         'title': 'Sergeant',
         'image': 'assets/images/sergeant.jpeg',
         'description': 'Leads a larger team and provides tactical leadership.',
-        'route': '/view_detail/sergeant',
       },
       {
         'title': 'Inspector',
         'image': 'assets/images/ip.jpeg',
         'description': 'Investigates crimes and supervises lower ranks.',
-        'route': '/view_detail/inspector',
       },
       {
         'title': 'Senior Inspector',
         'image': 'assets/images/so.jpeg',
         'description': 'Leads investigations and manages units.',
-        'route': '/view_detail/senior_inspector',
       },
       {
         'title': 'Police Officer',
         'image': 'assets/images/police2.jpeg',
         'description': 'Holds a leadership position such as company commander.',
-        'route': '/view_detail/police_officer',
       },
       {
         'title': 'Commissioner',
         'image': 'assets/images/tenue.jpeg',
         'description': 'Oversees larger units such as districts or departments.',
-        'route': '/view_detail/commissioner',
       },
       {
         'title': 'General Inspector',
         'image': 'assets/images/cyber.jpeg',
         'description': 'Highest rank in the National Police.',
-        'route': '/view_detail/general_inspector',
       },
     ];
 

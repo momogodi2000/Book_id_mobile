@@ -1,131 +1,133 @@
+import 'package:cni/Services/auth_services.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:provider/provider.dart';
 
-class ContactUsManagementPage extends StatefulWidget {
-  const ContactUsManagementPage({super.key});
+import 'crud_contact_us.dart';
 
+
+class ContactUsPage extends StatefulWidget {
   @override
-  _ContactUsManagementPageState createState() => _ContactUsManagementPageState();
+  _ContactUsPageState createState() => _ContactUsPageState();
 }
 
-class _ContactUsManagementPageState extends State<ContactUsManagementPage> {
-  List<ContactUsMessage> messages = [];
+class _ContactUsPageState extends State<ContactUsPage> {
+  List<dynamic> contactUsMessages = [];
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    fetchMessages();
+    fetchContactUsMessages();
   }
 
-  Future<void> fetchMessages() async {
-    final response = await http.get(Uri.parse('http://your_backend_api/get_contact_us_messages'));
-    if (response.statusCode == 200) {
+  Future<void> fetchContactUsMessages() async {
+    final contactUsService = Provider.of<Authservices>(context, listen: false);
+    try {
+      final messages = await contactUsService.fetchContactUsMessages();
       setState(() {
-        messages = (json.decode(response.body) as List)
-            .map((data) => ContactUsMessage.fromJson(data))
-            .toList();
+        contactUsMessages = messages;
+        isLoading = false;
       });
-    }
-  }
-
-  Future<void> deleteMessage(int id) async {
-    final response = await http.delete(Uri.parse('http://your_backend_api/delete_contact_us_message/$id'));
-    if (response.statusCode == 200) {
+    } catch (error) {
       setState(() {
-        messages.removeWhere((msg) => msg.id == id);
+        isLoading = false;
       });
+      print('Error fetching contact us messages: $error');
     }
   }
 
-  Future<void> replyMessage(int id, String reply) async {
-    final response = await http.post(
-      Uri.parse('http://your_backend_api/reply_contact_us_message/$id'),
-      body: {'reply_message': reply},
-    );
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reply sent successfully')));
-    }
-  }
-
-  void showReplyDialog(ContactUsMessage message) {
-    final TextEditingController replyController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Reply to ${message.name}'),
-        content: TextField(
-          controller: replyController,
-          decoration: const InputDecoration(hintText: 'Enter your reply here'),
-          maxLines: 5,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              replyMessage(message.id, replyController.text);
-              Navigator.of(context).pop();
-            },
-            child: const Text('Send Reply'),
-          ),
-        ],
+  void handleManageMessage(BuildContext context, Map<String, dynamic> message) async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CrudContactUsPage(message: message),
       ),
     );
+
+    if (result == true) {
+      fetchContactUsMessages(); // Refresh the list if a message was deleted
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Contact Us Messages'),
+        title: Text('Contact Us Messages'),
+        backgroundColor: Colors.blueAccent,
       ),
-      body: ListView.builder(
-        itemCount: messages.length,
-        itemBuilder: (context, index) {
-          final message = messages[index];
-          return Card(
-            elevation: 5,
-            margin: const EdgeInsets.all(10),
-            child: ListTile(
-              title: Text(message.name),
-              subtitle: Text('Email: ${message.email}\nMessage: ${message.message}\nDate: ${message.createdAt}'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.reply),
-                    onPressed: () => showReplyDialog(message),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => deleteMessage(message.id),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+      body: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.05,
+          vertical: screenHeight * 0.02,
+        ),
+        child: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(screenWidth),
+              SizedBox(height: screenHeight * 0.02),
+              _buildMessageList(screenHeight, screenWidth),
+            ],
+          ),
+        ),
       ),
     );
   }
-}
 
-class ContactUsMessage {
-  final int id;
-  final String name;
-  final String email;
-  final String message;
-  final String createdAt;
+  Widget _buildHeader(double screenWidth) {
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(seconds: 2),
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Text(
+            'Received Messages',
+            style: TextStyle(
+              fontSize: screenWidth * 0.08,
+              fontWeight: FontWeight.bold,
+              color: Colors.blueAccent,
+            ),
+          ),
+        );
+      },
+    );
+  }
 
-  ContactUsMessage({required this.id, required this.name, required this.email, required this.message, required this.createdAt});
-
-  factory ContactUsMessage.fromJson(Map<String, dynamic> json) {
-    return ContactUsMessage(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      message: json['message'],
-      createdAt: json['created_at'],
+  Widget _buildMessageList(double screenHeight, double screenWidth) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: contactUsMessages.length,
+      itemBuilder: (context, index) {
+        final message = contactUsMessages[index];
+        return Card(
+          elevation: 5,
+          margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01),
+          child: ListTile(
+            title: Text(message['name']),
+            subtitle: Text(message['message']),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.reply, color: Colors.blueAccent),
+                  onPressed: () => handleManageMessage(context, message),
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.redAccent),
+                  onPressed: () => handleManageMessage(context, message),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
