@@ -754,26 +754,27 @@ class Authservices with ChangeNotifier {
   }
 
 
-    Future<List<Appointment>> fetchAppointments() async {
-    final response = await http.get(Uri.parse('$baseUrl/get-add/'));
-    if (response.statusCode == 200) {
-    List<dynamic> body = json.decode(response.body)['data'];
-    return body.map((json) => Appointment.fromJson(json)).toList();
-    } else {
-    throw Exception('Failed to load appointments');
-    }
-    }
 
-    Future<bool> takeAction(int appointmentId, String action, String message) async {
-    final url = Uri.parse('$baseUrl/edit-delete/$appointmentId/');
+  Future<List<Appointment>> fetchAppointments() async {
+    final response = await http.get(Uri.parse('$baseUrl/appointments/get-add/'));
+    if (response.statusCode == 200) {
+      List<dynamic> body = json.decode(response.body)['data'];
+      return body.map((json) => Appointment.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load appointments');
+    }
+  }
+
+
+  Future<bool> takeAction(int appointmentId, String action, String message) async {
+    final url = Uri.parse('$baseUrl/appointments/edit-delete/$appointmentId/');
     final response = await http.put(
-    url,
-    body: jsonEncode({"response": action, "message": message}),
-    headers: {"Content-Type": "application/json"},
+      url,
+      body: jsonEncode({"response": action, "message": message}),
+      headers: {"Content-Type": "application/json"},
     );
     return response.statusCode == 200;
-    }
-
+  }
 
 
 

@@ -1,9 +1,9 @@
-import 'User_models.dart';
+import 'User_models.dart'; // Make sure this import is correct
 
 class Appointment {
   final int id;
   final User user; // Changed to User object
-  final String officer;
+  final User? officer; // Changed to User object and made nullable
   final String office;
   final String date;
   final String time;
@@ -15,7 +15,7 @@ class Appointment {
   Appointment({
     required this.id,
     required this.user, // Changed to User object
-    required this.officer,
+    this.officer, // Changed to User object
     required this.office,
     required this.date,
     required this.time,
@@ -30,7 +30,7 @@ class Appointment {
     return Appointment(
       id: json['id'],
       user: User.fromJson(json['user']), // Convert user JSON to User object
-      officer: json['officer'] ?? '',
+      officer: json['officer'] != null ? User.fromJson(json['officer']) : null, // Convert officer JSON to User object if exists
       office: json['office'],
       date: json['date'],
       time: json['time'],
@@ -46,7 +46,7 @@ class Appointment {
     return {
       'id': id,
       'user': user.toJson(), // Convert User object to JSON
-      'officer': officer,
+      'officer': officer?.toJson(), // Convert User object to JSON if exists
       'office': office,
       'date': date,
       'time': time,

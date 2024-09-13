@@ -11,7 +11,6 @@ import '../panel/clients/setting/logout.dart';
 import '../panel/clients/setting/profile.dart';
 import '../panel/clients/setting/support.dart';
 import '../panel/police/contact/contact_us_management.dart';
-import '../panel/police/manage_appointment/validation.dart';
 import '../panel/police/police_panel.dart';
 import '../panel/police/user/User_information.dart';
 

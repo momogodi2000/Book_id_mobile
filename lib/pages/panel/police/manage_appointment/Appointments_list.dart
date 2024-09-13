@@ -1,7 +1,6 @@
 import 'package:cni/Services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-
 import '../../../../models/police_models/appointment.dart';
 import 'Appointment_detail.dart';
 
