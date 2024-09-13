@@ -778,6 +778,21 @@ class Authservices with ChangeNotifier {
 
 
 
+
+  //admin panel
+// Service to fetch documents
+  Future<List<dynamic>> fetchDocuments() async {
+    final url = Uri.parse('$baseUrl/documents/');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['data'];
+    } else {
+      throw Exception('Failed to load documents');
+    }
+  }
+
+
+
 }
 
 

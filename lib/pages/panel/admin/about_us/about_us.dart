@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../header/admin_header.dart';
+
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
@@ -11,33 +13,19 @@ class AboutPage extends StatelessWidget {
     final isMobile = screenWidth < 600;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('About Us'),
-        backgroundColor: Colors.blueAccent,
-      ),
+      appBar: AdminHeaderPage(), // Updated appBar
+      drawer: AdminDashboardDrawer(), // Added drawer
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                ),
-                child: const Text('Return Home'),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              child: AnimationLimiter(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // About Section
+              AnimationLimiter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // About Section
                     AnimationConfiguration.staggeredList(
                       position: 0,
                       duration: const Duration(milliseconds: 500),
@@ -73,7 +61,7 @@ class AboutPage extends StatelessWidget {
                       context,
                       'Homepage',
                       'Am momo godi yvan a junior developer from AICS Cameroon...',
-                      'assets/images/auth.jpeg',
+                      'assets/images/yvan.jpg',
                       'https://example.com/project1',
                       'https://github.com/momogodi2000/projector-management-app-in-django.git',
                     ),
@@ -131,8 +119,8 @@ class AboutPage extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
