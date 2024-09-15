@@ -12,7 +12,7 @@ import '../models/police_models/missing_id_card.dart';
 
 class Authservices with ChangeNotifier {
   // Base URL of the Django backend
-  final String baseUrl = 'http://192.168.1.173:8000/api';
+  final String baseUrl = 'http://192.168.6.100:8000/api';
 
   // Token and phone for authenticated sessions
   String? _token;
@@ -400,13 +400,6 @@ class Authservices with ChangeNotifier {
 
 
 
-
-
-
-
-
-
-
   Future<void> fetchUserDetails() async {
     final userId = await getCurrentUserId(); // Get current user ID
     final url = Uri.parse('$baseUrl/user/$userId/'); // Updated endpoint to include user ID
@@ -424,7 +417,7 @@ class Authservices with ChangeNotifier {
         final data = json.decode(response.body);
         _userId = data['id']; // Extract user ID from response
         _name = data['name'] ?? 'Unknown User';
-        _profilePicture = data['profile_picture'] ?? 'https://assets/imsge/yvan.jpg';
+        _profilePicture = data['profile_picture'] ?? 'https://assets/image/yvan.jpg';
         notifyListeners(); // Notify listeners of the change
       } else {
         _handleHttpError(response.statusCode);
@@ -780,6 +773,7 @@ class Authservices with ChangeNotifier {
 
 
   //admin panel
+
 // Service to fetch documents
   Future<List<dynamic>> fetchDocuments() async {
     final url = Uri.parse('$baseUrl/documents/');
@@ -792,6 +786,107 @@ class Authservices with ChangeNotifier {
   }
 
 
+  Future<List<Map<String, dynamic>>> fetchNearbyPoliceStations(double latitude, double longitude) async {
+    final url = Uri.parse('$baseUrl/nearby-police-stations/');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'latitude': latitude,
+          'longitude': longitude,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        List<dynamic> policeStations = data['police_stations'];
+        return policeStations.map((station) {
+          return {
+            "name": station['name'],
+            "address": station['address'],
+            "latitude": station['latitude'],
+            "longitude": station['longitude'],
+          };
+        }).toList();
+      } else {
+        throw Exception('Failed to load police stations');
+      }
+    } catch (e) {
+      throw Exception('Error occurred while fetching police stations: $e');
+    }
+  }
+
+
+  Future<List<User>> fetchUsersFromApi() async {
+    final url = Uri.parse('$baseUrl/user/get-add/');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body)['data'];
+        final List<User> users = data.map((json) => User.fromJson(json)).toList();
+        return users; // Returning the list of users
+      } else {
+        throw Exception('Failed to fetch users. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching users: $error');
+      throw Exception('Error fetching users: $error');
+    }
+  }
+
+  Future<void> addUser(User user) async {
+    final url = Uri.parse('$baseUrl/user/add/');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(user.toJson()),
+      );
+
+      if (response.statusCode != 201) {
+        throw Exception('Failed to add user. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error adding user: $error');
+      throw Exception('Error adding user: $error');
+    }
+  }
+
+  Future<void> updateUser(User user) async {
+    final url = Uri.parse('$baseUrl/user/update/${user.id}/');
+    try {
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(user.toJson()),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update user. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error updating user: $error');
+      throw Exception('Error updating user: $error');
+    }
+  }
+
+  Future<void> deleteUser(int id) async {
+    final url = Uri.parse('$baseUrl/user/delete/$id/');
+    try {
+      final response = await http.delete(url);
+
+      if (response.statusCode != 204) {
+        throw Exception('Failed to delete user. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error deleting user: $error');
+      throw Exception('Error deleting user: $error');
+    }
+  }
 
 }
 

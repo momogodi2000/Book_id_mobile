@@ -4,8 +4,9 @@ import '../../provider/ThemeNotifier.dart';
 import '../panel/admin/about_us/about_us.dart';
 import '../panel/admin/communication/view_com.dart';
 import '../panel/admin/contact/contact_us_management.dart';
-import '../panel/admin/crud_user/view_user.dart';
+import '../panel/admin/crud_user/User_information.dart';
 import '../panel/admin/manage Document/document_page.dart';
+import '../panel/admin/map/near_by_police.dart';
 import '../panel/clients/setting/logout.dart';
 
 class AdminHeaderPage extends StatelessWidget implements PreferredSizeWidget {
@@ -170,7 +171,7 @@ class AdminDashboardDrawer extends StatelessWidget {
     return [
       _createDashboardItem(context),
       _createDrawerItem(Icons.group, 'Manage Users', () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const UserListPage()));
+        Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserListPage()));
       }),
       _createDrawerItem(Icons.document_scanner, 'Manage Documents', () {
         Navigator.push(context, MaterialPageRoute(builder: (_) => const DocumentPage()));
@@ -180,7 +181,8 @@ class AdminDashboardDrawer extends StatelessWidget {
 
       }),
       _createDrawerItem(Icons.map, 'Police Map', () {
-        // Handle police map
+        Navigator.push(context, MaterialPageRoute(builder: (context) =>  NearbyPoliceStationsPage()));
+
       }),
       _createDrawerItem(Icons.info_outline, 'About Us', () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutPage()));
