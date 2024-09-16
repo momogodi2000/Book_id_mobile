@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // Import the intl package for date formatting
 import '../../../../Services/auth_services.dart';
+import '../../../header/clients_header.dart';
 
 class UploadIDPage extends StatefulWidget {
   const UploadIDPage({super.key});
@@ -56,17 +57,14 @@ class _UploadIDPageState extends State<UploadIDPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Upload Found ID Card'),
-        backgroundColor: Colors.blueAccent,
-      ),
+      appBar: const ClientHeaderPage(), // Updated with ClientHeaderPage
+      drawer: const ClientDashboardDrawer(), // Updated with ClientDashboardDrawer
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.05,

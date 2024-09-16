@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../../Services/auth_services.dart';
+import '../../../header/clients_header.dart';
 import 'book_appointment.dart';
+
 
 class UploadDocPage extends StatefulWidget {
   const UploadDocPage({super.key});
@@ -23,7 +25,7 @@ class _UploadDocPageState extends State<UploadDocPage> with SingleTickerProvider
     "Criminal Record Extract",
     "Residence Permit",
     "Marriage Certificate",
-    "Worker / Students ",
+    "Worker / Students",
   ];
 
   late AnimationController _controller;
@@ -67,8 +69,7 @@ class _UploadDocPageState extends State<UploadDocPage> with SingleTickerProvider
   Future<void> _submitDocuments() async {
     if (_validateFiles()) {
       final authService = Provider.of<Authservices>(context, listen: false);
-      try {// Convert to String
-        //final userId = (await authService.getCurrentUserId()).toString();
+      try {
         final documentsMap = {
           'birth_certificate': _documents[0],
           'proof_of_nationality': _documents[1],
@@ -110,26 +111,25 @@ class _UploadDocPageState extends State<UploadDocPage> with SingleTickerProvider
     final isPortrait = size.height > size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Upload Documents"),
-      ),
+      appBar: const ClientHeaderPage(),
+      drawer: const ClientDashboardDrawer(),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(size.width * 0.05),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Welcome!",
               style: TextStyle(
-                fontSize: 24.0,
+                fontSize: size.width * 0.06,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8.0),
-            const Text(
+            Text(
               "Insert your national legalized documents.",
               style: TextStyle(
-                fontSize: 18.0,
+                fontSize: size.width * 0.04,
                 color: Colors.grey,
               ),
             ),
@@ -151,8 +151,8 @@ class _UploadDocPageState extends State<UploadDocPage> with SingleTickerProvider
                         children: [
                           Text(
                             _documentNames[index],
-                            style: const TextStyle(
-                              fontSize: 18.0,
+                            style: TextStyle(
+                              fontSize: size.width * 0.05,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -204,16 +204,19 @@ class _UploadDocPageState extends State<UploadDocPage> with SingleTickerProvider
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: size.width * 0.1,
+                    vertical: size.height * 0.02,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  backgroundColor: Theme.of(context).primaryColor,
+                  backgroundColor: Colors.blue, // Changed to blue
                 ),
                 onPressed: _submitDocuments,
-                child: const Text(
+                child: Text(
                   "Submit",
-                  style: TextStyle(fontSize: 18.0),
+                  style: TextStyle(fontSize: size.width * 0.045),
                 ),
               ),
             ),

@@ -51,45 +51,68 @@ class DashboardSection extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      padding: EdgeInsets.all(screenWidth * 0.03),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Dashboard',
-            style: TextStyle(
-              fontSize: screenWidth < 600 ? 16 : 18,
-              fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: EdgeInsets.all(screenWidth * 0.03),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Dashboard',
+              style: TextStyle(
+                fontSize: screenWidth * 0.05,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: screenWidth < 600 ? 2 : 3,
-              crossAxisSpacing: screenWidth * 0.03,
-              mainAxisSpacing: screenWidth * 0.03,
+            const SizedBox(height: 16),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(), // Disable scrolling
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: _getCrossAxisCount(screenWidth),
+                crossAxisSpacing: screenWidth * 0.03,
+                mainAxisSpacing: screenWidth * 0.03,
+                childAspectRatio: _getAspectRatio(screenWidth),
+              ),
+              itemCount: _dashboardWidgets.length,
+              itemBuilder: (context, index) {
+                return DashboardWidget(
+                  title: _dashboardWidgets[index].title,
+                  description: _dashboardWidgets[index].description,
+                  count: _dashboardWidgets[index].count,
+                  icon: _dashboardWidgets[index].icon,
+                  color: _dashboardWidgets[index].color,
+                );
+              },
             ),
-            itemCount: _dashboardWidgets.length,
-            itemBuilder: (context, index) {
-              return DashboardWidget(
-                title: _dashboardWidgets[index].title,
-                description: _dashboardWidgets[index].description,
-                count: _dashboardWidgets[index].count,
-                icon: _dashboardWidgets[index].icon,
-                color: _dashboardWidgets[index].color,
-              );
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  int _getCrossAxisCount(double screenWidth) {
+    if (screenWidth > 1200) {
+      return 4; // Large screens (desktops)
+    } else if (screenWidth > 800) {
+      return 3; // Tablets or medium-sized screens
+    } else {
+      return 2; // Mobile
+    }
+  }
+
+  double _getAspectRatio(double screenWidth) {
+    if (screenWidth > 1200) {
+      return 1.0; // Square-ish cards for large screens
+    } else if (screenWidth > 800) {
+      return 0.9; // Slightly wider cards for medium screens
+    } else {
+      return 0.75; // Narrower cards for mobile devices
+    }
   }
 }
 
@@ -135,11 +158,11 @@ class DashboardWidget extends StatelessWidget {
             color: Colors.grey.withOpacity(0.2),
             spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -148,18 +171,18 @@ class DashboardWidget extends StatelessWidget {
             size: 36,
             color: color,
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             title,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             description,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(color: Colors.grey.shade600),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Count: $count',
             style: TextStyle(

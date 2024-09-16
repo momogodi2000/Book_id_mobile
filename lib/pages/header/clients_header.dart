@@ -17,7 +17,6 @@ import '../panel/clients/missing_doc/upload_id.dart';
 import '../panel/clients/police_grade/grade.dart';
 import '../panel/clients/setting/LanguageSelectionPage.dart';
 import '../panel/clients/setting/call_center.dart';
-import '../panel/clients/setting/color.dart';
 import '../panel/clients/setting/logout.dart';
 import '../panel/clients/setting/profile.dart';
 import '../panel/clients/setting/support.dart';
@@ -28,13 +27,14 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     double appBarHeight = MediaQuery.of(context).size.height * 0.1;
 
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.appBarTheme.backgroundColor,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.menu, color: Colors.black),
+        icon: Icon(Icons.menu, color: theme.iconTheme.color),
         onPressed: () => Scaffold.of(context).openDrawer(),
       ),
       actions: [
@@ -49,8 +49,9 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
   }
 
   IconButton _appBarIconButton(IconData icon, BuildContext context, VoidCallback onPressed) {
+    final theme = Theme.of(context);
     return IconButton(
-      icon: Icon(icon, color: Colors.black),
+      icon: Icon(icon, color: theme.iconTheme.color),
       onPressed: onPressed,
     );
   }
@@ -96,7 +97,7 @@ class ClientHeaderPage extends StatelessWidget implements PreferredSizeWidget {
       title: Text(title),
       onTap: () {
         if (isLogout) {
-          Authservices().logout();
+          Provider.of<Authservices>(context, listen: false).logout();
           Navigator.of(context).pop();
         } else if (page != null) {
           Navigator.push(context, MaterialPageRoute(builder: (context) => page));
@@ -152,7 +153,7 @@ class ClientDashboardDrawer extends StatelessWidget {
     return Drawer(
       child: Column(
         children: [
-          _drawerHeader(authService),
+          _drawerHeader(context, authService),
           Expanded(
             child: ListView(
               children: [
@@ -174,9 +175,10 @@ class ClientDashboardDrawer extends StatelessWidget {
     );
   }
 
-  Widget _drawerHeader(Authservices authService) {
+  Widget _drawerHeader(BuildContext context, Authservices authService) {
+    final theme = Theme.of(context);
     return Container(
-      color: Colors.blue,
+      color: theme.primaryColor,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
       child: Row(
@@ -193,11 +195,11 @@ class ClientDashboardDrawer extends StatelessWidget {
             children: [
               Text(
                 authService.name ?? 'Default User',
-                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Text(
                 authService.email ?? 'default@example.com',
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: TextStyle(color: Colors.white, fontSize: 14),
               ),
             ],
           ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../header/clients_header.dart';
+
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
 
@@ -9,10 +11,8 @@ class AboutUsPage extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('About Us'),
-        backgroundColor: Colors.blueAccent,
-      ),
+      appBar: const ClientHeaderPage(),
+      drawer: const ClientDashboardDrawer(),
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.1,

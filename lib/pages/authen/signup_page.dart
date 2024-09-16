@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
+import 'dart:convert'; // Import for json.decode
 import '../../Services/auth_services.dart';
 import 'forgot_password_page.dart';
 import 'signin_page.dart';
@@ -22,7 +23,6 @@ class _SignupPageState extends State<SignupPage> {
   String _phone = '';
   File? _profileImage;
   bool _rememberMe = false;
-
   final ImagePicker _picker = ImagePicker();
 
   void _submitForm() {
@@ -44,6 +44,7 @@ class _SignupPageState extends State<SignupPage> {
       });
     }
   }
+
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
     if (pickedFile != null) {

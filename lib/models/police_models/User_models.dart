@@ -1,5 +1,7 @@
+import 'dart:io';
+
 class User {
-  final String id; // Add an ID field
+  final String id;
   final String email;
   final String role;
   final String name;
@@ -8,7 +10,7 @@ class User {
   final String profilePicture;
 
   User({
-    required this.id, // Require ID in the constructor
+    required this.id,
     required this.email,
     required this.role,
     required this.name,
@@ -17,9 +19,12 @@ class User {
     required this.profilePicture,
   });
 
+  // Getter for profileImage
+  File? get profileImage => profilePicture.isNotEmpty ? File(profilePicture) : null;
+
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'], // Assuming your API returns an ID
+      id: json['id'],
       email: json['email'],
       role: json['role'],
       name: json['name'],

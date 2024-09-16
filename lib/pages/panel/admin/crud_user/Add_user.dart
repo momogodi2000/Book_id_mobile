@@ -1,6 +1,9 @@
+import 'package:cni/Services/auth_services.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // For picking images
-import 'dart:io'; // For File handling
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
+import '../../../../models/police_models/User_models.dart';
 
 class AddUserPage extends StatefulWidget {
   final VoidCallback onUserAdded;
@@ -13,13 +16,11 @@ class AddUserPage extends StatefulWidget {
 
 class _AddUserPageState extends State<AddUserPage> {
   final _formKey = GlobalKey<FormState>();
-  String? _name, _email, _role, _phone;
+  String? _name, _email, _role, _phone, _address;
   File? _profileImage;
 
-  // Image picker instance
   final ImagePicker _picker = ImagePicker();
 
-  // Method to pick an image from the gallery
   Future<void> _pickImageFromGallery() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -29,13 +30,37 @@ class _AddUserPageState extends State<AddUserPage> {
     }
   }
 
-  // Method to capture an image from the camera
   Future<void> _captureImageFromCamera() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
         _profileImage = File(pickedFile.path);
       });
+    }
+  }
+
+  Future<void> _addUser() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      // Create a user object
+      User newUser = User(
+        id: DateTime.now().millisecondsSinceEpoch.toString(), // Generate a temporary ID
+        name: _name!,
+        email: _email!,
+        role: _role!,
+        phone: _phone!,
+        address: _address ?? 'No Address', // Default address if not provided
+        profilePicture: _profileImage?.path ?? '', // Use path or handle upload
+      );
+
+      try {
+        await Authservices().addUser(newUser);
+        widget.onUserAdded();
+        Navigator.pop(context);
+      } catch (error) {
+        print('Error adding user: $error');
+      }
     }
   }
 
@@ -47,19 +72,18 @@ class _AddUserPageState extends State<AddUserPage> {
         key: _formKey,
         child: ListView(
           children: [
-            // Profile Image Display
             Center(
               child: GestureDetector(
                 onTap: () {
                   _showImagePickerDialog(context);
                 },
                 child: CircleAvatar(
-                  radius: MediaQuery.of(context).size.width * 0.15, // Responsive size
+                  radius: MediaQuery.of(context).size.width * 0.15,
                   backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
                   child: _profileImage == null
                       ? Icon(
                     Icons.add_a_photo,
-                    size: MediaQuery.of(context).size.width * 0.15, // Responsive size
+                    size: MediaQuery.of(context).size.width * 0.15,
                     color: Colors.grey,
                   )
                       : null,
@@ -68,7 +92,6 @@ class _AddUserPageState extends State<AddUserPage> {
             ),
             SizedBox(height: 20),
 
-            // Name Input
             TextFormField(
               decoration: InputDecoration(labelText: 'Name'),
               onSaved: (value) => _name = value,
@@ -80,7 +103,6 @@ class _AddUserPageState extends State<AddUserPage> {
               },
             ),
 
-            // Email Input
             TextFormField(
               decoration: InputDecoration(labelText: 'Email'),
               onSaved: (value) => _email = value,
@@ -92,7 +114,6 @@ class _AddUserPageState extends State<AddUserPage> {
               },
             ),
 
-            // Role Dropdown
             DropdownButtonFormField<String>(
               value: _role,
               decoration: InputDecoration(labelText: 'Role'),
@@ -115,7 +136,6 @@ class _AddUserPageState extends State<AddUserPage> {
               },
             ),
 
-            // Phone Input
             TextFormField(
               decoration: InputDecoration(labelText: 'Phone'),
               onSaved: (value) => _phone = value,
@@ -127,20 +147,15 @@ class _AddUserPageState extends State<AddUserPage> {
               },
             ),
 
+            TextFormField(
+              decoration: InputDecoration(labelText: 'Address'),
+              onSaved: (value) => _address = value,
+            ),
+
             SizedBox(height: 20),
 
-            // Add User Button
             ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                  // Implement API call to add the user with _profileImage, _name, _email, _role, _phone
-
-                  // Call the onUserAdded callback
-                  widget.onUserAdded();
-                  Navigator.pop(context);
-                }
-              },
+              onPressed: _addUser,
               child: Text('Add User'),
             ),
           ],
@@ -149,7 +164,6 @@ class _AddUserPageState extends State<AddUserPage> {
     );
   }
 
-  // Image Picker Dialog to choose between Camera and Gallery
   void _showImagePickerDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,

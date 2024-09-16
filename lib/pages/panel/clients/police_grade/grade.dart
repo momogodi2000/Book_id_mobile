@@ -1,31 +1,38 @@
 import 'package:flutter/material.dart';
 
+import '../../../header/clients_header.dart';
+
 class PoliceOfficerGradesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cameroon Police Officer Grades'),
-      ),
+      appBar: const ClientHeaderPage(), // Custom app bar widget
+      drawer: const ClientDashboardDrawer(), // Custom drawer widget
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Cameroon Police Officer Grades',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+            Center(
+              child: Text(
+                'Cameroon Police Officer Grades',
+                style: TextStyle(
+                  fontSize: screenWidth < 600 ? 20 : 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             const SizedBox(height: 20),
-            Expanded(child: _buildPoliceCorpsGrid(context)),
+            Expanded(child: _buildPoliceCorpsGrid(context, screenWidth)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPoliceCorpsGrid(BuildContext context) {
+  Widget _buildPoliceCorpsGrid(BuildContext context, double screenWidth) {
     final List<Map<String, String>> policeCorps = [
       {
         'title': 'National Police',
@@ -81,52 +88,52 @@ class PoliceOfficerGradesPage extends StatelessWidget {
 
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: MediaQuery.of(context).size.width < 600 ? 2 : 3,
-        childAspectRatio: 0.7,
+        crossAxisCount: screenWidth < 600 ? 2 : 3,
+        childAspectRatio: screenWidth < 600 ? 0.8 : 0.7,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
       itemCount: policeCorps.length,
       itemBuilder: (context, index) {
         final corps = policeCorps[index];
-        return GestureDetector(
-          onTap: () {
-            Navigator.pushNamed(context, corps['route']!);
-          },
-          child: Card(
-            elevation: 5,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-                    child: Image.asset(
-                      corps['image']!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
+        return Card(
+          elevation: 5,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                  child: Image.asset(
+                    corps['image']!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      corps['title']!,
+                      style: TextStyle(
+                        fontSize: screenWidth < 600 ? 16 : 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        corps['title']!,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    const SizedBox(height: 4),
+                    Text(
+                      corps['description']!,
+                      style: TextStyle(
+                        fontSize: screenWidth < 600 ? 12 : 14,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        corps['description']!,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },

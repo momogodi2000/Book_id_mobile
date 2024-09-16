@@ -12,7 +12,7 @@ import '../models/police_models/missing_id_card.dart';
 
 class Authservices with ChangeNotifier {
   // Base URL of the Django backend
-  final String baseUrl = 'http://192.168.6.100:8000/api';
+  final String baseUrl = 'http://192.168.1.173:8000/api';
 
   // Token and phone for authenticated sessions
   String? _token;
@@ -31,7 +31,7 @@ class Authservices with ChangeNotifier {
   String? get email => _email;
 
 
-
+// Authentications
 
   Future<void> signup(
       String username,
@@ -132,12 +132,41 @@ class Authservices with ChangeNotifier {
       if (response.statusCode == 200) {
         notifyListeners();
       } else {
-        throw Exception('Failed to request password reset');
+        final responseData = json.decode(response.body);
+        throw Exception(responseData['message'] ?? 'Failed to request password reset');
       }
     } catch (error) {
-      throw error;
+      throw Exception('Network error: ${error.toString()}');
     }
   }
+
+
+  // New changePassword method
+  Future<void> changePassword(String email, String code, String newPassword) async {
+    final url = Uri.parse('$baseUrl/change-password/');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'code': code, // Assuming you need this for verification
+          'new_password': newPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Password changed successfully');
+      } else {
+        final responseData = json.decode(response.body);
+        throw Exception(responseData['message'] ?? 'Failed to change password');
+      }
+    } catch (error) {
+      throw Exception('Network error: ${error.toString()}');
+    }
+  }
+
+  
 
   Future<void> resetPassword(String email, String newPassword) async {
     final url = Uri.parse('$baseUrl/reset-password/');
@@ -203,6 +232,9 @@ class Authservices with ChangeNotifier {
     notifyListeners();
   }
 
+
+
+// clients panel
 
   Future<void> uploadID({
     required String username,
@@ -839,14 +871,19 @@ class Authservices with ChangeNotifier {
   }
 
   Future<void> addUser(User user) async {
-    final url = Uri.parse('$baseUrl/user/add/');
+    final url = Uri.parse('$baseUrl/user/get-add/');
     try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(user.toJson()),
-      );
+      var request = http.MultipartRequest('POST', url);
+      request.fields['name'] = user.name;
+      request.fields['email'] = user.email;
+      request.fields['role'] = user.role;
+      request.fields['phone'] = user.phone;
 
+      if (user.profilePicture != null) {
+        request.files.add(await http.MultipartFile.fromPath('profile_picture', user.profilePicture));
+      }
+
+      final response = await request.send();
       if (response.statusCode != 201) {
         throw Exception('Failed to add user. Status code: ${response.statusCode}');
       }
@@ -856,8 +893,9 @@ class Authservices with ChangeNotifier {
     }
   }
 
+
   Future<void> updateUser(User user) async {
-    final url = Uri.parse('$baseUrl/user/update/${user.id}/');
+    final url = Uri.parse('$baseUrl/user/edit-delete/${user.id}/');
     try {
       final response = await http.put(
         url,
@@ -874,6 +912,7 @@ class Authservices with ChangeNotifier {
     }
   }
 
+
   Future<void> deleteUser(int id) async {
     final url = Uri.parse('$baseUrl/user/delete/$id/');
     try {
@@ -885,6 +924,26 @@ class Authservices with ChangeNotifier {
     } catch (error) {
       print('Error deleting user: $error');
       throw Exception('Error deleting user: $error');
+    }
+  }
+
+
+  // Method to fetch user by ID
+  Future<User> fetchUserById(int userId) async {
+    final url = Uri.parse('$baseUrl/user/edit-delete/$userId/');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return User.fromJson(jsonData);
+      } else {
+        throw Exception('Failed to fetch user. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching user: $error');
+      throw Exception('Error fetching user: $error');
     }
   }
 

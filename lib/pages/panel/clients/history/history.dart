@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../header/clients_header.dart';
+ // Make sure to include the correct path for ClientDashboardDrawer
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -41,12 +43,8 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('History of National ID Card'),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.blueAccent,
-      ),
+      appBar: const ClientHeaderPage(),
+      drawer: const ClientDashboardDrawer(),
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: ScaleTransition(
@@ -87,28 +85,6 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                     screenWidth,
                   ),
                   const SizedBox(height: 32),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Go Back'),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                          vertical: screenWidth < 600 ? 12 : 16,
-                          horizontal: screenWidth < 600 ? 24 : 32,
-                        ),
-                        backgroundColor: Colors.blueAccent,
-                        textStyle: TextStyle(
-                          fontSize: screenWidth < 600 ? 16 : 18,
-                        ),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),

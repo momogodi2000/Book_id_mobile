@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../Services/auth_services.dart';  // Make sure to import your Authservices
-import 'signin_page.dart';
+import 'change_password_page.dart'; // Import the ChangePasswordPage
+import '../../Services/auth_services.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -52,7 +52,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
                 FadeTransition(
                   opacity: _animation,
                   child: Image.asset(
-                    'assets/images/auth.jpeg', // Replace with your image path
+                    'assets/images/auth.jpeg',
                     height: 150,
                     width: 150,
                   ),
@@ -86,10 +86,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
                         const SizedBox(height: 10),
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const SigninPage()),
-                            );
+                            Navigator.pop(context); // Go back to Sign In
                           },
                           child: const Text(
                             'Sign In',
@@ -137,8 +134,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
                               try {
                                 await Provider.of<Authservices>(context, listen: false)
                                     .forgotPassword(_email);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Password reset email sent!')),
+                                // Redirect to Change Password Page
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChangePasswordPage(email: _email),
+                                  ),
                                 );
                               } catch (error) {
                                 ScaffoldMessenger.of(context).showSnackBar(

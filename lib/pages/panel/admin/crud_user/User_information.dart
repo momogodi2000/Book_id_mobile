@@ -82,8 +82,7 @@ class _UserListPageState extends State<UserListPage> with SingleTickerProviderSt
   }
 
   void _showEditUserDialog(String userIdString) {
-    // Convert userIdString to int
-    int userId = int.parse(userIdString);
+    int userId = int.parse(userIdString); // Convert userIdString to int
 
     showDialog(
       context: context,

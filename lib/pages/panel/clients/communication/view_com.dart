@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../Services/auth_services.dart';
+import '../../../header/clients_header.dart';
 import 'downlaod.dart';
 
 class CommunicationPage extends StatefulWidget {
@@ -44,17 +45,15 @@ class _CommunicationPageState extends State<CommunicationPage> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Communications'),
-        backgroundColor: Colors.blueAccent,
-      ),
+      appBar: const ClientHeaderPage(),
+      drawer: const ClientDashboardDrawer(),
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.05,
           vertical: screenHeight * 0.03,
         ),
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -117,7 +116,7 @@ class _CommunicationPageState extends State<CommunicationPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Image.network(
-                      "http://192.168.100.5:8000/"+communication['location'], // Use network image for file URL
+                      "http://192.168.100.5:8000/" + communication['location'], // Updated network image
                       width: screenWidth,
                       height: screenHeight * 0.25,
                       fit: BoxFit.cover,

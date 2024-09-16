@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../header/clients_header.dart';
+
 class CombinedContactPage extends StatelessWidget {
   const CombinedContactPage({super.key});
 
@@ -9,10 +11,8 @@ class CombinedContactPage extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Contact Us'),
-        backgroundColor: Colors.blueAccent,
-      ),
+      appBar: const ClientHeaderPage(), // Custom app bar
+      drawer: const ClientDashboardDrawer(), // Custom drawer
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(
@@ -69,9 +69,7 @@ class CombinedContactPage extends StatelessWidget {
         const Text(
           'Our call center is here to help you with any questions or issues regarding the national ID card process. Our dedicated team is available to assist you.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-          ),
+          style: TextStyle(fontSize: 16),
         ),
       ],
     );
@@ -119,9 +117,7 @@ class CombinedContactPage extends StatelessWidget {
             ),
             Text(
               detail,
-              style: const TextStyle(
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontSize: 16),
             ),
           ],
         ),
@@ -224,14 +220,14 @@ class CombinedContactPage extends StatelessWidget {
             children: [
               Text(
                 region['title'],
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
               ...region['items'].map((item) => ListTile(
                 title: Text(item),
                 contentPadding: EdgeInsets.zero,
               )),
-              Divider(),
+              const Divider(),
             ],
           ),
         );

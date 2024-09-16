@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// Import the DetailMissingPage
+// Import the necessary components
 import '../../../../Services/auth_services.dart';
+import '../../../header/clients_header.dart';
 import 'DetailMissingPage.dart';
+
 
 class FindIDPage extends StatefulWidget {
   const FindIDPage({Key? key}) : super(key: key);
@@ -53,17 +55,15 @@ class _FindIDPageState extends State<FindIDPage> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Found National ID Cards'),
-        backgroundColor: Colors.blueAccent,
-      ),
+      appBar: const ClientHeaderPage(), // Use your custom header
+      drawer: const ClientDashboardDrawer(), // Add the custom drawer
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.05,
           vertical: screenHeight * 0.03,
         ),
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
