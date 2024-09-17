@@ -1,6 +1,6 @@
-import 'package:cni/Services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:cni/Services/auth_services.dart';
 import '../../../../models/police_models/User_models.dart';
 import '../../../header/admin_header.dart';
 import 'Add_user.dart';
@@ -119,7 +119,9 @@ class _UserListPageState extends State<UserListPage> with SingleTickerProviderSt
               userName: user.name,
               userRole: user.role,
               userEmail: user.email,
-              userImage: user.profilePicture, // Corrected field name
+              userImage: user.profilePicture.isNotEmpty
+                  ? user.profilePicture
+                  : 'assets/images/yvan.jpg', // Placeholder for profile picture
             ),
           ),
         );
@@ -160,7 +162,7 @@ class _UserListPageState extends State<UserListPage> with SingleTickerProviderSt
                     IconButton(
                       icon: Icon(Icons.edit),
                       onPressed: () {
-                        _showEditUserDialog(user.id); // Pass user ID
+                        _showEditUserDialog(user.id.toString()); // Pass user ID
                       },
                     ),
                     IconButton(

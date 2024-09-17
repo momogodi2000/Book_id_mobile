@@ -24,13 +24,13 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
-      email: json['email'],
-      role: json['role'],
-      name: json['name'],
-      phone: json['phone'],
-      address: json['address'] ?? 'No Address',
-      profilePicture: json['profile_picture'] ?? '',
+      id: json['id'] ?? '',  // Default to empty string if null
+      email: json['email'] ?? 'No Email',  // Default email if null
+      role: json['role'] ?? 'No Role',  // Default role if null
+      name: json['name'] ?? 'No Name',  // Default name if null
+      phone: json['phone'] ?? 'No Phone',  // Default phone if null
+      address: json['address'] ?? 'No Address',  // Keep default address
+      profilePicture: json['profile_picture'] ?? '',  // Default profile picture path if null
     );
   }
 

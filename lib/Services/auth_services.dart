@@ -85,12 +85,23 @@ class Authservices with ChangeNotifier {
           'password': password,
         }),
       );
+      print('Response: ${response.body}');
+
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        _token = responseData['token'];
-        String userRole = responseData['data']['role'];
-        await saveUserId(responseData['data']['id']);
+        _token = responseData['token'] ?? '';
+
+        // Use null-aware operators to safely access user data
+        String userRole = responseData['data']['role'] ?? 'guest';
+        int userId = responseData['data']['id'] ?? 0;
+
+        // Save user data for future sessions
+        await saveUserId(userId);
+
+        // Redirect the user based on their role
         _redirectBasedOnRole(userRole, context);
+
+        // Notify listeners of the successful login
         notifyListeners();
       } else if (response.statusCode == 400) {
         // Show specific error messages
@@ -100,12 +111,12 @@ class Authservices with ChangeNotifier {
         throw Exception('Failed to sign in');
       }
     } catch (error) {
+      // Display error messages in a SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error.toString())),
       );
     }
   }
-
 
   void _redirectBasedOnRole(String role, BuildContext context) {
     switch (role) {
@@ -120,6 +131,7 @@ class Authservices with ChangeNotifier {
         break;
     }
   }
+
 
   Future<void> forgotPassword(String email) async {
     final url = Uri.parse('$baseUrl/forgot-password/');
@@ -166,7 +178,7 @@ class Authservices with ChangeNotifier {
     }
   }
 
-  
+
 
   Future<void> resetPassword(String email, String newPassword) async {
     final url = Uri.parse('$baseUrl/reset-password/');
@@ -851,6 +863,7 @@ class Authservices with ChangeNotifier {
     }
   }
 
+// crud user
 
   Future<List<User>> fetchUsersFromApi() async {
     final url = Uri.parse('$baseUrl/user/get-add/');
@@ -869,6 +882,7 @@ class Authservices with ChangeNotifier {
       throw Exception('Error fetching users: $error');
     }
   }
+
 
   Future<void> addUser(User user) async {
     final url = Uri.parse('$baseUrl/user/get-add/');
