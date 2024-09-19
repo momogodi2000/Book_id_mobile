@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../models/police_models/appointment.dart';
 import 'Action_page.dart';
+import 'document_view_page.dart'; // Import the newly created DocumentViewPage
 
 class AppointmentDetailPage extends StatelessWidget {
   final Appointment appointment;
@@ -21,7 +22,7 @@ class AppointmentDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'User: ${appointment.user?.name}',
+              'User: ${appointment.user?.name ?? 'N/A'}',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
@@ -41,7 +42,7 @@ class AppointmentDetailPage extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              'Documents: ${appointment.documents.join(", ")}',
+              'Documents: ${appointment.documents.isNotEmpty ? appointment.documents.join(", ") : 'None'}',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             SizedBox(height: 10),
@@ -91,6 +92,25 @@ class AppointmentDetailPage extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DocumentViewPage(documentUrls: appointment.documents),
+                  ),
+                );
+              },
+              child: Text('View Documents'),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             ),
           ],
         ),
