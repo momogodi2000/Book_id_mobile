@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cni/Services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -12,38 +13,89 @@ class EditUserPage extends StatefulWidget {
   _EditUserPageState createState() => _EditUserPageState();
 }
 
-class _EditUserPageState extends State<EditUserPage> {
+class _EditUserPageState extends State<EditUserPage> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   String? _name, _email, _role, _phone;
   File? _profileImage;
+  bool _isLoading = true;
+  final _picker = ImagePicker();
+  late Authservices _authService;
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    // Fetch user details by ID and populate the form
-    _fetchUserDetails(widget.userId);
+    _authService = Authservices as Authservices; // Update with your actual API URL
+    _fetchUsersFromApi(widget.userId);
+
+    // Animation setup
+    _controller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    )..repeat(reverse: true);
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
   }
 
-  void _fetchUserDetails(int userId) {
-    // Implement API call to fetch user details and populate the fields
-    // For example:
-    // setState(() {
-    //   _name = fetchedUser.name;
-    //   _email = fetchedUser.email;
-    //   _role = fetchedUser.role;
-    //   _phone = fetchedUser.phone;
-    //   _profileImage = fetchedUser.profileImage; // If applicable
-    // });
+  Future<void> _fetchUsersFromApi(int userId) async {
+    try {
+      final userData = await _authService.fetchUserDetailsFromApi(userId);
+      setState(() {
+        _name = userData['name'];
+        _email = userData['email'];
+        _role = userData['role'];
+        _phone = userData['phone'];
+        _profileImage = userData['profile_picture'] != null
+            ? File(userData['profile_picture'])
+            : null;
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Error fetching user details: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await ImagePicker().pickImage(source: source);
+    final pickedFile = await _picker.pickImage(source: source);
 
     if (pickedFile != null) {
       setState(() {
         _profileImage = File(pickedFile.path);
       });
     }
+  }
+
+  Future<void> _updateUser() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    _formKey.currentState!.save();
+
+    try {
+      await _authService.updateUser(
+        widget.userId,
+        _name!,
+        _email!,
+        _role!,
+        _phone!,
+        _profileImage,
+      );
+      widget.onUserUpdated();
+      Navigator.pop(context);
+    } catch (error) {
+      print('Error updating user: $error');
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -54,7 +106,14 @@ class _EditUserPageState extends State<EditUserPage> {
       appBar: AppBar(
         title: Text('Edit User'),
       ),
-      body: Padding(
+      body: _isLoading
+          ? Center(
+        child: FadeTransition(
+          opacity: _animation,
+          child: CircularProgressIndicator(),
+        ),
+      )
+          : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -89,13 +148,22 @@ class _EditUserPageState extends State<EditUserPage> {
                     },
                   );
                 },
-                child: CircleAvatar(
-                  radius: isMobile ? 60 : 80,
-                  backgroundImage:
-                  _profileImage != null ? FileImage(_profileImage!) : null,
-                  child: _profileImage == null
-                      ? Icon(Icons.camera_alt, size: isMobile ? 60 : 80)
-                      : null,
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.blue, width: 2),
+                  ),
+                  child: CircleAvatar(
+                    radius: isMobile ? 60 : 80,
+                    backgroundImage: _profileImage != null
+                        ? FileImage(_profileImage!)
+                        : null,
+                    child: _profileImage == null
+                        ? Icon(Icons.camera_alt, size: isMobile ? 60 : 80)
+                        : null,
+                  ),
                 ),
               ),
               SizedBox(height: 20),
@@ -155,15 +223,7 @@ class _EditUserPageState extends State<EditUserPage> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    // API call to update the user
-                    // Implement the API update logic here
-                    widget.onUserUpdated();
-                    Navigator.pop(context);
-                  }
-                },
+                onPressed: _updateUser,
                 child: Text('Update User'),
               ),
             ],

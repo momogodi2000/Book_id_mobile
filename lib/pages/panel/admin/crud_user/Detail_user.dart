@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart'; // For animations
 
 class DetailUserPage extends StatelessWidget {
   final String userName;
   final String userEmail;
   final String userRole;
   final String userImage;
-  final String userPhone; // Add the userPhone parameter
+  final String userPhone;
   final String userAddress;
 
   DetailUserPage({
@@ -14,11 +15,16 @@ class DetailUserPage extends StatelessWidget {
     required this.userRole,
     required this.userImage,
     required this.userPhone,
-    required this.userAddress, // Initialize the new parameter
+    required this.userAddress,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Media query for responsive layout
+    var screenWidth = MediaQuery.of(context).size.width;
+    var screenHeight = MediaQuery.of(context).size.height;
+    var isMobile = screenWidth < 600;
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
@@ -26,25 +32,42 @@ class DetailUserPage extends StatelessWidget {
       backgroundColor: Colors.white,
       child: Container(
         padding: EdgeInsets.all(20),
-        width: MediaQuery.of(context).size.width * 0.85, // Responsive width
-        height: MediaQuery.of(context).size.height * 0.65, // Adjusted height for additional info
+        width: isMobile ? screenWidth * 0.9 : screenWidth * 0.6, // Responsive width
+        height: isMobile ? screenHeight * 0.75 : screenHeight * 0.65, // Responsive height
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // User Image
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage(userImage),
-            ),
-            SizedBox(height: 20),
-
-            // User Name
-            Text(
-              userName,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+            // User Image with animation
+            Hero(
+              tag: 'userImage',
+              child: CircleAvatar(
+                radius: isMobile ? 40 : 50,
+                backgroundImage: AssetImage(userImage),
               ),
+            ),
+            SizedBox(height: isMobile ? 10 : 20),
+
+            // User Name with animation
+            OpenContainer(
+              closedElevation: 0,
+              transitionDuration: Duration(milliseconds: 500),
+              openBuilder: (context, action) {
+                return Scaffold(
+                  appBar: AppBar(
+                    title: Text(userName),
+                  ),
+                  body: Center(child: Text('More details about $userName')),
+                );
+              },
+              closedBuilder: (context, action) {
+                return Text(
+                  userName,
+                  style: TextStyle(
+                    fontSize: isMobile ? 20 : 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              },
             ),
             SizedBox(height: 10),
 
@@ -52,7 +75,7 @@ class DetailUserPage extends StatelessWidget {
             Text(
               userEmail,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: isMobile ? 16 : 18,
                 color: Colors.grey[700],
               ),
             ),
@@ -62,7 +85,7 @@ class DetailUserPage extends StatelessWidget {
             Text(
               "Phone: $userPhone",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: isMobile ? 16 : 18,
                 color: Colors.grey[700],
               ),
             ),
@@ -72,21 +95,33 @@ class DetailUserPage extends StatelessWidget {
             Text(
               "Role: $userRole",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: isMobile ? 16 : 18,
                 fontWeight: FontWeight.w500,
                 color: Colors.blueAccent,
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
 
-            // Close Button
+            // User Address
+            Text(
+              "Address: $userAddress",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: isMobile ? 14 : 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            SizedBox(height: isMobile ? 20 : 30),
+
+            // Close Button with animation
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
               child: Text("Close"),
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 20 : 40, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

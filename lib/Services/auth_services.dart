@@ -36,6 +36,7 @@ class Authservices with ChangeNotifier {
   String? get email => _email;
 
 
+
 // Authentications
 
   Future<void> signup(String username,
@@ -871,8 +872,7 @@ class Authservices with ChangeNotifier {
         final users = data.map((json) => User.fromJson(json)).toList();
         return users; // Return list of User objects
       } else {
-        throw Exception(
-            'Failed to fetch users. Status code: ${response.statusCode}');
+        throw Exception('Failed to fetch users. Status code: ${response.statusCode}');
       }
     } catch (error) {
       print('Error fetching users: $error');
@@ -881,62 +881,37 @@ class Authservices with ChangeNotifier {
   }
 
 
-  Future<void> addUser(User user) async {
-    final url = Uri.parse('$baseUrl/user/get-add/');
+  Future<Map<String, dynamic>> fetchUserDetailsFromApi(int userId) async {
+    final url = Uri.parse('$baseUrl/get-add/');
     try {
-      var request = http.MultipartRequest('POST', url);
-
-      // Adding user fields to the request
-      request.fields['name'] = user.name;
-      request.fields['email'] = user.email;
-      request.fields['role'] = user.role;
-      request.fields['phone'] = user.phone;
-      request.fields['address'] = user.address;
-      request.fields['password'] = user.password; // Add password field
-
-      // Check if the profile picture is provided
-      if (user.profilePicture.isNotEmpty) {
-        request.files.add(await http.MultipartFile.fromPath(
-          'profile_picture',
-          user.profilePicture,
-        ));
-      }
-
-      // Send the request
-      final response = await request.send();
-
-      // Convert the response stream to string
-      final responseBody = await response.stream.bytesToString();
-
-      // Handle the response based on the status code
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        // User added successfully
-        print('User added successfully: $responseBody');
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        return json.decode(response.body)['data'];
       } else {
-        // Handle the case when the user creation failed
-        throw Exception('Failed to add user. Status code: ${response
-            .statusCode}, Response: $responseBody');
+        throw Exception('Failed to load user details');
       }
     } catch (error) {
-      // Log the error with more details
-      print('Error adding user: $error');
-      throw Exception('Error adding user: $error');
+      print('Error fetching user details: $error');
+      throw Exception('Error fetching user details: $error');
     }
   }
 
+  Future<void> updateUser(int userId, String name, String email, String role, String phone, File? profileImage) async {
+    final url = Uri.parse('$baseUrl/user/edit-delete/$userId/');
+    final request = http.MultipartRequest('PUT', url)
+      ..fields['name'] = name
+      ..fields['email'] = email
+      ..fields['role'] = role
+      ..fields['phone'] = phone;
 
-  Future<void> updateUser(User user) async {
-    final url = Uri.parse('$baseUrl/user/edit-delete/${user.id}/');
+    if (profileImage != null) {
+      request.files.add(await http.MultipartFile.fromPath('profile_picture', profileImage.path));
+    }
+
     try {
-      final response = await http.put(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(user.toJson()),
-      );
-
+      final response = await request.send();
       if (response.statusCode != 200) {
-        throw Exception(
-            'Failed to update user. Status code: ${response.statusCode}');
+        throw Exception('Failed to update user. Status code: ${response.statusCode}');
       }
     } catch (error) {
       print('Error updating user: $error');
@@ -945,20 +920,21 @@ class Authservices with ChangeNotifier {
   }
 
 
+
   Future<void> deleteUser(int id) async {
     final url = Uri.parse('$baseUrl/user/delete/$id/');
     try {
       final response = await http.delete(url);
 
       if (response.statusCode != 204) {
-        throw Exception(
-            'Failed to delete user. Status code: ${response.statusCode}');
+        throw Exception('Failed to delete user. Status code: ${response.statusCode}');
       }
     } catch (error) {
       print('Error deleting user: $error');
       throw Exception('Error deleting user: $error');
     }
   }
+
 
 
   // Method to fetch user by ID
@@ -1005,6 +981,70 @@ class Authservices with ChangeNotifier {
     }
   }
 
+// duplicated signup for adding new user
+
+  Future<void> Adduser(
+      BuildContext context,  // Pass BuildContext to show messages
+      String username,
+      String email,
+      String password,
+      String phone,
+      File? profilePicture,
+      String address,  // Added address field
+      String role      // Added role field
+      ) async {
+    final url = Uri.parse('$baseUrl/register/');
+    try {
+      var request = http.MultipartRequest('POST', url)
+        ..fields['username'] = username
+        ..fields['email'] = email
+        ..fields['password'] = password
+        ..fields['phone'] = phone
+        ..fields['address'] = address // Add the address to the request
+        ..fields['role'] = role;      // Add the role to the request
+
+      if (profilePicture != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'profile_picture',
+            profilePicture.path,
+          ),
+        );
+      }
+
+      final response = await request.send();
+      final responseData = await response.stream.bytesToString();
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('User added successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        String errorMessage = json.decode(responseData)['errors'] ?? 'Unknown error';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $errorMessage'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        throw Exception('Failed to create account: $errorMessage');
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error signing up: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      throw Exception('Error signing up: $error');
+    }
+  }
+
+
+
   // document and missing id card duplicated
 
   Future<List<Document>> fetchDocumentsFromAPI() async {
@@ -1033,7 +1073,6 @@ class Authservices with ChangeNotifier {
       throw Exception('Failed to load missing ID cards: ${response.statusCode}');
     }
   }
-
 
 }
 

@@ -50,6 +50,7 @@ class DashboardSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
+    final screenHeight = mediaQuery.size.height;
 
     return SingleChildScrollView(
       child: Container(
@@ -149,6 +150,10 @@ class DashboardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final screenHeight = mediaQuery.size.height;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -168,7 +173,7 @@ class DashboardWidget extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 36,
+            size: screenWidth * 0.05,
             color: color,
           ),
           const SizedBox(height: 8),
@@ -186,7 +191,7 @@ class DashboardWidget extends StatelessWidget {
           Text(
             'Count: $count',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: screenWidth * 0.04,
               fontWeight: FontWeight.bold,
               color: color,
             ),

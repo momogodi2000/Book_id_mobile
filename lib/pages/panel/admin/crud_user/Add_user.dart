@@ -2,7 +2,6 @@ import 'package:cni/Services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../../../../models/police_models/User_models.dart';
 
 class AddUserPage extends StatefulWidget {
   final VoidCallback onUserAdded;
@@ -42,19 +41,19 @@ class _AddUserPageState extends State<AddUserPage> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      User newUser = User(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _name!,
-        email: _email!,
-        role: _role!,
-        phone: _phone!,
-        address: _address ?? 'No Address',
-        profilePicture: _profileImage?.path ?? '',
-        password: _password!, // Include password
-      );
-
       try {
-        await Authservices().addUser(newUser);
+        // Use the updated Adduser method from auth_services to create a new user
+        await Authservices().Adduser(
+          context,         // Pass the context for showing messages
+          _name!,          // Name field
+          _email!,         // Email field
+          _password!,      // Password field
+          _phone!,         // Phone field
+          _profileImage,   // Profile picture file
+          _address!,       // Address field
+          _role!,          // Role field
+        );
+
         widget.onUserAdded();
         Navigator.pop(context);
       } catch (error) {
@@ -168,6 +167,12 @@ class _AddUserPageState extends State<AddUserPage> {
               TextFormField(
                 decoration: InputDecoration(labelText: 'Address'),
                 onSaved: (value) => _address = value,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an address';
+                  }
+                  return null;
+                },
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Password'),

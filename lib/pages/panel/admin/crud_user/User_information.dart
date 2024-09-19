@@ -81,29 +81,6 @@ class _UserListPageState extends State<UserListPage> with SingleTickerProviderSt
     );
   }
 
-  void _showEditUserDialog(String userIdString) {
-    int userId = int.parse(userIdString); // Convert userIdString to int
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Container(
-            padding: EdgeInsets.all(20),
-            width: MediaQuery.of(context).size.width * 0.85,
-            child: EditUserPage(
-              userId: userId, // Pass the userId as an int
-              onUserUpdated: _fetchUsers, // Refresh the user list after editing
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   void _showDetailUserDialog(User user) {
     showDialog(
       context: context,
@@ -131,6 +108,17 @@ class _UserListPageState extends State<UserListPage> with SingleTickerProviderSt
     );
   }
 
+  Future<void> _deleteUser(String userIdString) async {
+    int userId = int.parse(userIdString); // Convert userIdString to int
+    try {
+      // Replace with actual delete API method
+      await Authservices().deleteUser(userId);
+      _fetchUsers(); // Refresh the user list after deleting
+    } catch (error) {
+      print('Error deleting user: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,7 +139,7 @@ class _UserListPageState extends State<UserListPage> with SingleTickerProviderSt
                 leading: CircleAvatar(
                   backgroundImage: user.profilePicture.isNotEmpty
                       ? NetworkImage(user.profilePicture)
-                      : AssetImage('assets/images/yvan.jpg'), // Placeholder
+                      : AssetImage('assets/images/yvan.jpg') as ImageProvider, // Placeholder
                 ),
                 title: Text(user.name),
                 subtitle: Text("Role: ${user.role}"),
@@ -164,13 +152,46 @@ class _UserListPageState extends State<UserListPage> with SingleTickerProviderSt
                     IconButton(
                       icon: Icon(Icons.edit),
                       onPressed: () {
-                        _showEditUserDialog(user.id.toString()); // Pass user ID
+                        // Navigate to EditUserPage
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditUserPage(
+                              userId: int.parse(user.id), // Pass user ID as an int
+                              onUserUpdated: _fetchUsers, // Refresh the user list after editing
+                            ),
+                          ),
+                        );
                       },
                     ),
                     IconButton(
                       icon: Icon(Icons.delete),
                       onPressed: () {
-                        // Call delete API
+                        // Confirm deletion
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Delete User'),
+                              content: Text('Are you sure you want to delete this user?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // Close dialog
+                                  },
+                                  child: Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // Close dialog
+                                    _deleteUser(user.id); // Delete user
+                                  },
+                                  child: Text('Delete'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
                       },
                     ),
                   ],
