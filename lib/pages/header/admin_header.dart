@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/ThemeNotifier.dart';
 import '../panel/admin/about_us/about_us.dart';
+import '../panel/admin/admin_panel.dart';
 import '../panel/admin/communication/view_com.dart';
 import '../panel/admin/contact/contact_us_management.dart';
 import '../panel/admin/crud_user/User_information.dart';
+import '../panel/admin/manage Document/doc_admin.dart';
 import '../panel/admin/manage Document/document_page.dart';
 import '../panel/admin/map/near_by_police.dart';
+import '../panel/admin/statistic/statistics_page.dart';
 import '../panel/clients/setting/logout.dart';
 
 class AdminHeaderPage extends StatelessWidget implements PreferredSizeWidget {
@@ -174,7 +177,7 @@ class AdminDashboardDrawer extends StatelessWidget {
         Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserListPage()));
       }),
       _createDrawerItem(Icons.document_scanner, 'Manage Documents', () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const DocumentPage()));
+        Navigator.push(context, MaterialPageRoute(builder: (_) =>  StatisticDoc()));
       }),
       _createDrawerItem(Icons.contact_page, 'Manage Contact Messages', () {
         Navigator.push(context, MaterialPageRoute(builder: (_) =>  ContactUsPage()));
@@ -200,10 +203,11 @@ class AdminDashboardDrawer extends StatelessWidget {
       title: const Text('Dashboard'),
       children: [
         _createDrawerItem(Icons.bar_chart, 'Statistics', () {
-          // Handle statistics action
+          Navigator.push(context, MaterialPageRoute(builder: (context) => StatisticsPage()));
+
         }),
-        _createDrawerItem(Icons.analytics, 'Analysis', () {
-          // Handle analysis action
+        _createDrawerItem(Icons.dashboard, 'Dashboard', () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => AdminPanelPage()));
         }),
       ],
     );

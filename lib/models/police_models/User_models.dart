@@ -8,6 +8,8 @@ class User {
   final String phone;
   final String address;
   final String profilePicture;
+  final String password; // New field
+
 
   User({
     required this.id,
@@ -17,6 +19,8 @@ class User {
     required this.phone,
     required this.address,
     required this.profilePicture,
+    required this.password, // Include password in constructor
+
   });
 
   // Getter for profileImage
@@ -29,8 +33,10 @@ class User {
       role: json['role'] ?? 'No Role',  // Default role if null
       name: json['name'] ?? 'No Name',  // Default name if null
       phone: json['phone'] ?? 'No Phone',  // Default phone if null
-      address: json['address'] ?? 'No Address',  // Keep default address
+      address: json['address'] ?? 'No Address',  // Default address
       profilePicture: json['profile_picture'] ?? '',  // Default profile picture path if null
+      password: json['password'] ?? '', // Default password if null
+
     );
   }
 
@@ -43,6 +49,7 @@ class User {
       'phone': phone,
       'address': address,
       'profile_picture': profilePicture,
+      'password': password, // Include password in JSON
     };
   }
 }

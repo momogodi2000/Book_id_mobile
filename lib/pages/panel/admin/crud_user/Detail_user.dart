@@ -5,12 +5,16 @@ class DetailUserPage extends StatelessWidget {
   final String userEmail;
   final String userRole;
   final String userImage;
+  final String userPhone; // Add the userPhone parameter
+  final String userAddress;
 
   DetailUserPage({
     required this.userName,
     required this.userEmail,
     required this.userRole,
     required this.userImage,
+    required this.userPhone,
+    required this.userAddress, // Initialize the new parameter
   });
 
   @override
@@ -23,7 +27,7 @@ class DetailUserPage extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(20),
         width: MediaQuery.of(context).size.width * 0.85, // Responsive width
-        height: MediaQuery.of(context).size.height * 0.6, // Responsive height
+        height: MediaQuery.of(context).size.height * 0.65, // Adjusted height for additional info
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -54,6 +58,16 @@ class DetailUserPage extends StatelessWidget {
             ),
             SizedBox(height: 10),
 
+            // User Phone
+            Text(
+              "Phone: $userPhone",
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[700],
+              ),
+            ),
+            SizedBox(height: 10),
+
             // User Role
             Text(
               "Role: $userRole",
@@ -65,7 +79,7 @@ class DetailUserPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
 
-            // Buttons (optional for further actions)
+            // Close Button
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();

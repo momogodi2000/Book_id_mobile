@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/admin_models/document_models.dart';
+import '../models/admin_models/statistic.dart';
 import '../models/police_models/User_models.dart';
 import '../models/police_models/appointment.dart';
 import '../models/police_models/missing_id_card.dart';
@@ -23,23 +25,24 @@ class Authservices with ChangeNotifier {
   int? _userId;
 
 
-
   String? get token => _token;
+
   String? get phone => _phone;
+
   String? get name => _name;
+
   String? get profilePicture => _profilePicture;
+
   String? get email => _email;
 
 
 // Authentications
 
-  Future<void> signup(
-      String username,
+  Future<void> signup(String username,
       String email,
       String password,
       String phone,
-      File? profilePicture,
-      ) async {
+      File? profilePicture,) async {
     final url = Uri.parse('$baseUrl/register/');
     try {
       var request = http.MultipartRequest('POST', url)
@@ -64,7 +67,9 @@ class Authservices with ChangeNotifier {
         print('Signup successful: $responseData');
       } else {
         print('Error response: $responseData');
-        throw Exception('Failed to create account: ${json.decode(responseData)['errors'] ?? 'Unknown error'}');
+        throw Exception(
+            'Failed to create account: ${json.decode(responseData)['errors'] ??
+                'Unknown error'}');
       }
     } catch (error) {
       print('Error signing up: $error');
@@ -73,8 +78,8 @@ class Authservices with ChangeNotifier {
   }
 
 
-
-  Future<void> signin(String email, String password, BuildContext context) async {
+  Future<void> signin(String email, String password,
+      BuildContext context) async {
     final url = Uri.parse('$baseUrl/login/');
     try {
       final response = await http.post(
@@ -145,7 +150,8 @@ class Authservices with ChangeNotifier {
         notifyListeners();
       } else {
         final responseData = json.decode(response.body);
-        throw Exception(responseData['message'] ?? 'Failed to request password reset');
+        throw Exception(
+            responseData['message'] ?? 'Failed to request password reset');
       }
     } catch (error) {
       throw Exception('Network error: ${error.toString()}');
@@ -154,7 +160,8 @@ class Authservices with ChangeNotifier {
 
 
   // New changePassword method
-  Future<void> changePassword(String email, String code, String newPassword) async {
+  Future<void> changePassword(String email, String code,
+      String newPassword) async {
     final url = Uri.parse('$baseUrl/change-password/');
     try {
       final response = await http.post(
@@ -177,7 +184,6 @@ class Authservices with ChangeNotifier {
       throw Exception('Network error: ${error.toString()}');
     }
   }
-
 
 
   Future<void> resetPassword(String email, String newPassword) async {
@@ -245,7 +251,6 @@ class Authservices with ChangeNotifier {
   }
 
 
-
 // clients panel
 
   Future<void> uploadID({
@@ -269,7 +274,8 @@ class Authservices with ChangeNotifier {
         ..fields['date_found'] = formattedDate; // Use the formatted date
 
       // Add the image file to the request
-      request.files.add(await http.MultipartFile.fromPath('id_card_image', imagePath));
+      request.files.add(
+          await http.MultipartFile.fromPath('id_card_image', imagePath));
 
       // Send the request
       final streamedResponse = await request.send();
@@ -290,9 +296,6 @@ class Authservices with ChangeNotifier {
       throw Exception('Error during upload: $error');
     }
   }
-
-
-
 
 
 // Method to send a contact us message
@@ -337,7 +340,8 @@ class Authservices with ChangeNotifier {
 
   // Method to delete an ID card
   Future<void> deleteIDCard(String id) async {
-    final url = Uri.parse('$baseUrl/missing-cards/$id/'); // Endpoint for deleting the ID card
+    final url = Uri.parse(
+        '$baseUrl/missing-cards/$id/'); // Endpoint for deleting the ID card
 
     try {
       final response = await http.delete(
@@ -365,10 +369,9 @@ class Authservices with ChangeNotifier {
   }
 
 
-
-
   Future<List<dynamic>> fetchCommunications() async {
-    final url = Uri.parse('$baseUrl/communications/'); // Adjust endpoint as needed
+    final url = Uri.parse(
+        '$baseUrl/communications/'); // Adjust endpoint as needed
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -437,16 +440,10 @@ class Authservices with ChangeNotifier {
   }
 
 
-
-
-
-
-
-
-
   Future<void> fetchUserDetails() async {
     final userId = await getCurrentUserId(); // Get current user ID
-    final url = Uri.parse('$baseUrl/user/$userId/'); // Updated endpoint to include user ID
+    final url = Uri.parse(
+        '$baseUrl/user/$userId/'); // Updated endpoint to include user ID
 
     try {
       final response = await http.get(
@@ -461,7 +458,8 @@ class Authservices with ChangeNotifier {
         final data = json.decode(response.body);
         _userId = data['id']; // Extract user ID from response
         _name = data['name'] ?? 'Unknown User';
-        _profilePicture = data['profile_picture'] ?? 'https://assets/image/yvan.jpg';
+        _profilePicture =
+            data['profile_picture'] ?? 'https://assets/image/yvan.jpg';
         notifyListeners(); // Notify listeners of the change
       } else {
         _handleHttpError(response.statusCode);
@@ -480,14 +478,14 @@ class Authservices with ChangeNotifier {
       case 404:
         throw Exception('User not found.');
       default:
-        throw Exception('Failed to load user details. Status code: $statusCode');
+        throw Exception(
+            'Failed to load user details. Status code: $statusCode');
     }
   }
 
 
-
-
-  Future<void> updateProfile(String name, String email, String password, String profilePicture) async {
+  Future<void> updateProfile(String name, String email, String password,
+      String profilePicture) async {
     final userId = await getCurrentUserId(); // Get current user ID
     final url = Uri.parse('$baseUrl/user/$userId/'); // Ensure correct URL
 
@@ -578,15 +576,14 @@ class Authservices with ChangeNotifier {
           throw Exception('Invalid response format');
         }
       } else {
-        throw Exception('Failed to load police stations: ${response.statusCode}');
+        throw Exception(
+            'Failed to load police stations: ${response.statusCode}');
       }
     } catch (error) {
       // Handle or log the error
       throw Exception('Failed to fetch police stations: $error');
     }
   }
-
-
 
 
   Future<void> uploadDocuments(Map<String, File?> documents) async {
@@ -616,7 +613,6 @@ class Authservices with ChangeNotifier {
   }
 
 
-
   // Method to save user ID (this should be called after login)
   Future<void> saveUserId(int userId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -633,8 +629,6 @@ class Authservices with ChangeNotifier {
       throw Exception('User ID not found');
     }
   }
-
-
 
 
 // book appointment
@@ -658,9 +652,9 @@ class Authservices with ChangeNotifier {
         },
         body: json.encode({
           'date': formattedDate, // Correctly formatted date
-          'time': time,          // Correct time format
-          'user': userId,        // User ID
-          'office': office,      // Add the 'office' field
+          'time': time, // Correct time format
+          'user': userId, // User ID
+          'office': office, // Add the 'office' field
         }),
       );
 
@@ -684,7 +678,7 @@ class Authservices with ChangeNotifier {
         url,
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'phone': phone,  // Ensure valid phone number format
+          'phone': phone, // Ensure valid phone number format
           'user': {'id': userId},
         }),
       );
@@ -779,7 +773,8 @@ class Authservices with ChangeNotifier {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body)['data'];
-        final List<User> users = data.map((json) => User.fromJson(json)).toList();
+        final List<User> users = data.map((json) => User.fromJson(json))
+            .toList();
         return users; // Returning the list of users
       } else {
         throw Exception('Failed to fetch users');
@@ -791,9 +786,9 @@ class Authservices with ChangeNotifier {
   }
 
 
-
   Future<List<Appointment>> fetchAppointments() async {
-    final response = await http.get(Uri.parse('$baseUrl/appointments/get-add/'));
+    final response = await http.get(
+        Uri.parse('$baseUrl/appointments/get-add/'));
     if (response.statusCode == 200) {
       List<dynamic> body = json.decode(response.body)['data'];
       return body.map((json) => Appointment.fromJson(json)).toList();
@@ -803,7 +798,8 @@ class Authservices with ChangeNotifier {
   }
 
 
-  Future<bool> takeAction(int appointmentId, String action, String message) async {
+  Future<bool> takeAction(int appointmentId, String action,
+      String message) async {
     final url = Uri.parse('$baseUrl/appointments/edit-delete/$appointmentId/');
     final response = await http.put(
       url,
@@ -812,8 +808,6 @@ class Authservices with ChangeNotifier {
     );
     return response.statusCode == 200;
   }
-
-
 
 
   //admin panel
@@ -830,7 +824,8 @@ class Authservices with ChangeNotifier {
   }
 
 
-  Future<List<Map<String, dynamic>>> fetchNearbyPoliceStations(double latitude, double longitude) async {
+  Future<List<Map<String, dynamic>>> fetchNearbyPoliceStations(double latitude,
+      double longitude) async {
     final url = Uri.parse('$baseUrl/nearby-police-stations/');
     try {
       final response = await http.post(
@@ -863,6 +858,7 @@ class Authservices with ChangeNotifier {
     }
   }
 
+
 // crud user
 
   Future<List<User>> fetchUsersFromApi() async {
@@ -871,11 +867,12 @@ class Authservices with ChangeNotifier {
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body)['data'];
-        final List<User> users = data.map((json) => User.fromJson(json)).toList();
-        return users; // Returning the list of users
+        final data = json.decode(response.body)['data'] as List<dynamic>;
+        final users = data.map((json) => User.fromJson(json)).toList();
+        return users; // Return list of User objects
       } else {
-        throw Exception('Failed to fetch users. Status code: ${response.statusCode}');
+        throw Exception(
+            'Failed to fetch users. Status code: ${response.statusCode}');
       }
     } catch (error) {
       print('Error fetching users: $error');
@@ -888,20 +885,40 @@ class Authservices with ChangeNotifier {
     final url = Uri.parse('$baseUrl/user/get-add/');
     try {
       var request = http.MultipartRequest('POST', url);
+
+      // Adding user fields to the request
       request.fields['name'] = user.name;
       request.fields['email'] = user.email;
       request.fields['role'] = user.role;
       request.fields['phone'] = user.phone;
+      request.fields['address'] = user.address;
+      request.fields['password'] = user.password; // Add password field
 
-      if (user.profilePicture != null) {
-        request.files.add(await http.MultipartFile.fromPath('profile_picture', user.profilePicture));
+      // Check if the profile picture is provided
+      if (user.profilePicture.isNotEmpty) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'profile_picture',
+          user.profilePicture,
+        ));
       }
 
+      // Send the request
       final response = await request.send();
-      if (response.statusCode != 201) {
-        throw Exception('Failed to add user. Status code: ${response.statusCode}');
+
+      // Convert the response stream to string
+      final responseBody = await response.stream.bytesToString();
+
+      // Handle the response based on the status code
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // User added successfully
+        print('User added successfully: $responseBody');
+      } else {
+        // Handle the case when the user creation failed
+        throw Exception('Failed to add user. Status code: ${response
+            .statusCode}, Response: $responseBody');
       }
     } catch (error) {
+      // Log the error with more details
       print('Error adding user: $error');
       throw Exception('Error adding user: $error');
     }
@@ -918,7 +935,8 @@ class Authservices with ChangeNotifier {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to update user. Status code: ${response.statusCode}');
+        throw Exception(
+            'Failed to update user. Status code: ${response.statusCode}');
       }
     } catch (error) {
       print('Error updating user: $error');
@@ -933,7 +951,8 @@ class Authservices with ChangeNotifier {
       final response = await http.delete(url);
 
       if (response.statusCode != 204) {
-        throw Exception('Failed to delete user. Status code: ${response.statusCode}');
+        throw Exception(
+            'Failed to delete user. Status code: ${response.statusCode}');
       }
     } catch (error) {
       print('Error deleting user: $error');
@@ -953,7 +972,8 @@ class Authservices with ChangeNotifier {
         final jsonData = json.decode(response.body);
         return User.fromJson(jsonData);
       } else {
-        throw Exception('Failed to fetch user. Status code: ${response.statusCode}');
+        throw Exception(
+            'Failed to fetch user. Status code: ${response.statusCode}');
       }
     } catch (error) {
       print('Error fetching user: $error');
@@ -961,7 +981,65 @@ class Authservices with ChangeNotifier {
     }
   }
 
+
+  Future<List<Statistic>> fetchStatistics() async {
+    final url = Uri.parse('$baseUrl/statistics/');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = json.decode(response.body);
+
+      // Return a list of statistics based on API response
+      return [
+        Statistic(category: 'Users', count: data['user_count']),
+        Statistic(category: 'Appointments', count: data['appointment_count']),
+        Statistic(category: 'Documents', count: data['document_count']),
+        Statistic(category: 'Missing ID Cards', count: data['missing_id_card_count']),
+        Statistic(category: 'Notifications', count: data['notification_count']),
+        Statistic(category: 'Communications', count: data['communication_count']),
+        Statistic(category: 'Contact Us', count: data['contact_us_count']),
+        Statistic(category: 'Password Resets', count: data['password_reset_count']),
+      ];
+    } else {
+      throw Exception('Failed to load statistics: ${response.statusCode}');
+    }
+  }
+
+  // document and missing id card duplicated
+
+  Future<List<Document>> fetchDocumentsFromAPI() async {
+    final url = Uri.parse('$baseUrl/documents/');
+
+    final response = await http.get(url); // Make the HTTP GET request
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body)['data'];
+      print(data); // Debugging line
+      return data.map((doc) => Document.fromJson(doc)).toList();
+    }else {
+      throw Exception('Failed to load documents: ${response.statusCode}');
+    }
+  }
+
+  Future<List<MissingIDCard>> fetchMissingIDCardsFromAPi() async {
+    final url = Uri.parse('$baseUrl/missing-cards/');
+
+    final response = await http.get(url); // Make the HTTP GET request
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body)['data'];
+      return data.map((card) => MissingIDCard.fromJson(card)).toList();
+    } else {
+      throw Exception('Failed to load missing ID cards: ${response.statusCode}');
+    }
+  }
+
+
 }
+
+
+
+
 
 
 

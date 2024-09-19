@@ -119,6 +119,8 @@ class _UserListPageState extends State<UserListPage> with SingleTickerProviderSt
               userName: user.name,
               userRole: user.role,
               userEmail: user.email,
+              userPhone: user.phone,
+              userAddress: user.address,
               userImage: user.profilePicture.isNotEmpty
                   ? user.profilePicture
                   : 'assets/images/yvan.jpg', // Placeholder for profile picture
