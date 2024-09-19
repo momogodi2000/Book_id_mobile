@@ -2,6 +2,7 @@ import 'package:cni/Services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../header/police_header.dart';
 import 'crud_contact_us.dart';
 
 
@@ -44,7 +45,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
     );
 
     if (result == true) {
-      fetchContactUsMessages(); // Refresh the list if a message was deleted
+      fetchContactUsMessages(); // Refresh the list if a message was deleted or edited
     }
   }
 
@@ -54,17 +55,15 @@ class _ContactUsPageState extends State<ContactUsPage> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Contact Us Messages'),
-        backgroundColor: Colors.blueAccent,
-      ),
+      appBar: const PoliceHeaderPage(), // Using the imported PoliceHeaderPage
+      drawer: const PoliceDashboardDrawer(), // Using the imported PoliceDashboardDrawer
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.05,
           vertical: screenHeight * 0.02,
         ),
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +101,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
   Widget _buildMessageList(double screenHeight, double screenWidth) {
     return ListView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: contactUsMessages.length,
       itemBuilder: (context, index) {
         final message = contactUsMessages[index];
@@ -116,11 +115,11 @@ class _ContactUsPageState extends State<ContactUsPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.reply, color: Colors.blueAccent),
+                  icon: const Icon(Icons.reply, color: Colors.blueAccent),
                   onPressed: () => handleManageMessage(context, message),
                 ),
                 IconButton(
-                  icon: Icon(Icons.delete, color: Colors.redAccent),
+                  icon: const Icon(Icons.delete, color: Colors.redAccent),
                   onPressed: () => handleManageMessage(context, message),
                 ),
               ],

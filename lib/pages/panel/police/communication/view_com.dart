@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../../Services/auth_services.dart';
+import '../../../header/police_header.dart';
 import 'Addcommunication.dart';
+
 
 class CommunicationPage extends StatefulWidget {
   const CommunicationPage({super.key});
@@ -157,8 +159,8 @@ class _CommunicationPageState extends State<CommunicationPage> {
           ),
           child: Container(
             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.9),
-            padding: EdgeInsets.all(16),
-            child: AddCommunicationPage(),
+            padding: const EdgeInsets.all(16),
+            child: const AddCommunicationPage(),
           ),
         );
       },
@@ -171,23 +173,15 @@ class _CommunicationPageState extends State<CommunicationPage> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Communications'),
-        backgroundColor: Colors.blueAccent,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: showAddCommunicationDialog,
-          ),
-        ],
-      ),
+      appBar: const PoliceHeaderPage(), // Using the imported PoliceHeaderPage
+      drawer: const PoliceDashboardDrawer(), // Using the imported PoliceDashboardDrawer
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.05,
           vertical: screenHeight * 0.03,
         ),
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -197,6 +191,33 @@ class _CommunicationPageState extends State<CommunicationPage> {
               _buildCommunicationList(screenWidth, screenHeight),
             ],
           ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: showAddCommunicationDialog,
+        backgroundColor: Colors.blueAccent,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, // Buttons moved down
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.home, color: Colors.blueAccent),
+              onPressed: () {
+                // Navigate to home or any other action
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.notifications, color: Colors.blueAccent),
+              onPressed: () {
+                // Notifications action
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -273,11 +294,11 @@ class _CommunicationPageState extends State<CommunicationPage> {
                         Row(
                           children: [
                             IconButton(
-                              icon: Icon(Icons.edit, color: Colors.blueAccent),
+                              icon: const Icon(Icons.edit, color: Colors.blueAccent),
                               onPressed: () => editCommunication(communication),
                             ),
                             IconButton(
-                              icon: Icon(Icons.delete, color: Colors.redAccent),
+                              icon: const Icon(Icons.delete, color: Colors.redAccent),
                               onPressed: () => deleteCommunication(communication['id']),
                             ),
                           ],

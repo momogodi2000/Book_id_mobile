@@ -2,6 +2,8 @@ import 'package:cni/Services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../../../models/police_models/User_models.dart';
+import '../../../header/police_header.dart';
+
 
 class UserPage extends StatefulWidget {
   @override
@@ -32,15 +34,19 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    // Use MediaQuery for responsive layout
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isMobile = screenWidth < 600;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Users"),
-      ),
+      appBar: const PoliceHeaderPage(), // Custom header
+      drawer: const PoliceDashboardDrawer(), // Custom drawer
       body: FutureBuilder<List<User>>(
         future: users,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: SpinKitCircle(
                 color: Colors.blue,
                 size: 50.0,
@@ -51,34 +57,37 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
               child: Text('Error: ${snapshot.error}'),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
+            return const Center(
               child: Text('No users found'),
             );
           }
 
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              return GridView.builder(
-                padding: EdgeInsets.all(10),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: constraints.maxWidth > 600 ? 3 : 1,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  final user = snapshot.data![index];
-                  return _buildUserCard(user);
-                },
-              );
-            },
+          // Responsive grid view based on device width
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.05,
+              vertical: screenHeight * 0.02,
+            ),
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: isMobile ? 1 : 2, // 1 column on mobile, 2 on larger screens
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: isMobile ? 1 : 1.5, // Adjust card aspect ratio for larger screens
+              ),
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                final user = snapshot.data![index];
+                return _buildUserCard(user, screenHeight, screenWidth);
+              },
+            ),
           );
         },
       ),
     );
   }
 
-  Widget _buildUserCard(User user) {
+  Widget _buildUserCard(User user, double screenHeight, double screenWidth) {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -87,37 +96,40 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
           child: Card(
             elevation: 5,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(15),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: const EdgeInsets.all(10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   user.profilePicture.isNotEmpty
                       ? CircleAvatar(
-                    radius: 40,
+                    radius: screenHeight * 0.06, // Responsive avatar size
                     backgroundImage: NetworkImage(user.profilePicture),
                   )
                       : CircleAvatar(
-                    radius: 40,
+                    radius: screenHeight * 0.06, // Responsive default avatar size
                     backgroundColor: Colors.grey[300],
-                    child: Icon(Icons.person, size: 40),
+                    child: Icon(
+                      Icons.person,
+                      size: screenHeight * 0.06, // Icon size relative to screen height
+                    ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: screenHeight * 0.02), // Responsive spacing
                   Text(
                     user.name,
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: screenWidth * 0.05, // Responsive font size
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 5),
-                  Text(user.email),
-                  SizedBox(height: 5),
-                  Text(user.phone),
-                  SizedBox(height: 5),
-                  Text(user.address),
+                  SizedBox(height: screenHeight * 0.01),
+                  Text(user.email, style: TextStyle(fontSize: screenWidth * 0.04)),
+                  SizedBox(height: screenHeight * 0.005),
+                  Text(user.phone, style: TextStyle(fontSize: screenWidth * 0.04)),
+                  SizedBox(height: screenHeight * 0.005),
+                  Text(user.address, style: TextStyle(fontSize: screenWidth * 0.04)),
                 ],
               ),
             ),

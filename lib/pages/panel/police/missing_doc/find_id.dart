@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../Services/auth_services.dart';
+import '../../../header/police_header.dart';
 import '../../clients/missing_doc/upload_id.dart';
 import 'DetailMissingPage.dart';
+
 
 class FindIDPage extends StatefulWidget {
   const FindIDPage({Key? key}) : super(key: key);
@@ -62,17 +64,15 @@ class _FindIDPageState extends State<FindIDPage> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Found National ID Cards'),
-        backgroundColor: Colors.blueAccent,
-      ),
+      appBar: const PoliceHeaderPage(), // Using the PoliceHeaderPage
+      drawer: const PoliceDashboardDrawer(), // Using the PoliceDashboardDrawer
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: screenWidth * 0.05,
           vertical: screenHeight * 0.03,
         ),
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,7 +90,7 @@ class _FindIDPageState extends State<FindIDPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => UploadIDPage()),
+            MaterialPageRoute(builder: (context) => const UploadIDPage()),
           );
         },
         backgroundColor: Colors.blueAccent,
