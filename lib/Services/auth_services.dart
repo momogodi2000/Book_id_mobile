@@ -14,7 +14,7 @@ import '../models/police_models/missing_id_card.dart';
 
 class Authservices with ChangeNotifier {
   // Base URL of the Django backend
-  final String baseUrl = 'http://192.168.1.173:8000/api';
+  final String baseUrl = 'http://192.168.6.100:8000/api';
 
   // Token and phone for authenticated sessions
   String? _token;
@@ -698,6 +698,10 @@ class Authservices with ChangeNotifier {
   }
 
 
+
+
+
+
   // police panel
 
   Future<List<dynamic>> fetchContactUsMessages() async {
@@ -790,6 +794,7 @@ class Authservices with ChangeNotifier {
   Future<List<Appointment>> fetchAppointments() async {
     final response = await http.get(
         Uri.parse('$baseUrl/appointments/get-add/'));
+
     if (response.statusCode == 200) {
       List<dynamic> body = json.decode(response.body)['data'];
       return body.map((json) => Appointment.fromJson(json)).toList();
@@ -809,6 +814,9 @@ class Authservices with ChangeNotifier {
     );
     return response.statusCode == 200;
   }
+
+
+
 
 
   //admin panel

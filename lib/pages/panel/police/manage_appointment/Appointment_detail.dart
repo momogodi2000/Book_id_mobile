@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../models/police_models/appointment.dart';
 import 'Action_page.dart';
 
-
 class AppointmentDetailPage extends StatelessWidget {
   final Appointment appointment;
 
@@ -11,20 +10,48 @@ class AppointmentDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Appointment Details')),
+      appBar: AppBar(
+        title: Text('Appointment Details'),
+        backgroundColor: Colors.blue,
+        elevation: 5,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('User: ${appointment.user.name}', style: TextStyle(fontSize: 18)),
-            Text('Date: ${appointment.date}', style: TextStyle(fontSize: 16)),
-            Text('Time: ${appointment.time}', style: TextStyle(fontSize: 16)),
-            Text('Payment Status: ${appointment.paid ? 'Paid' : 'Not Paid'}', style: TextStyle(fontSize: 16)),
-            Text('Documents: ${appointment.documents.join(", ")}', style: TextStyle(fontSize: 16)),
-            Text('Status: ${appointment.status}', style: TextStyle(fontSize: 16)),
+            Text(
+              'User: ${appointment.user?.name}',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Date: ${appointment.date}',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Time: ${appointment.time}',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Payment Status: ${appointment.paid ? 'Paid' : 'Not Paid'}',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Documents: ${appointment.documents.join(", ")}',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Status: ${appointment.status}',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
             SizedBox(height: 20),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
                   onPressed: () {
@@ -36,6 +63,13 @@ class AppointmentDetailPage extends StatelessWidget {
                     );
                   },
                   child: Text('Approve'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                 ),
                 SizedBox(width: 10),
                 ElevatedButton(
@@ -48,6 +82,13 @@ class AppointmentDetailPage extends StatelessWidget {
                     );
                   },
                   child: Text('Reject'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                 ),
               ],
             ),

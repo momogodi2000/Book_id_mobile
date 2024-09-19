@@ -1,9 +1,9 @@
-import 'User_models.dart'; // Make sure this import is correct
+import 'User_models.dart';
 
 class Appointment {
   final int id;
-  final User user; // Changed to User object
-  final User? officer; // Changed to User object and made nullable
+  final User? user;  // Nullable, user could be null
+  final User? officer; // Nullable, officer could be null
   final String office;
   final String date;
   final String time;
@@ -14,8 +14,8 @@ class Appointment {
 
   Appointment({
     required this.id,
-    required this.user, // Changed to User object
-    this.officer, // Changed to User object
+    this.user,
+    this.officer,
     required this.office,
     required this.date,
     required this.time,
@@ -25,28 +25,27 @@ class Appointment {
     required this.documents,
   });
 
-  // Factory method to create an Appointment object from JSON
   factory Appointment.fromJson(Map<String, dynamic> json) {
     return Appointment(
       id: json['id'],
-      user: User.fromJson(json['user']), // Convert user JSON to User object
-      officer: json['officer'] != null ? User.fromJson(json['officer']) : null, // Convert officer JSON to User object if exists
-      office: json['office'],
-      date: json['date'],
-      time: json['time'],
-      paid: json['paid'],
-      status: json['status'],
-      cardStatus: json['card_status'],
+      user: json['user'] is Map<String, dynamic> ? User.fromJson(json['user']) : null,
+      officer: json['officer'] is Map<String, dynamic> ? User.fromJson(json['officer']) : null,
+      office: json['office'].toString(),  // Convert to String
+      date: json['date'].toString(),      // Convert to String
+      time: json['time'].toString(),      // Convert to String
+      paid: json['paid'] == 1,            // Boolean conversion if necessary
+      status: json['status'].toString(),
+      cardStatus: json['card_status'].toString(),
       documents: List<String>.from(json['documents'] ?? []),
     );
   }
 
-  // Method to convert Appointment object to JSON
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'user': user.toJson(), // Convert User object to JSON
-      'officer': officer?.toJson(), // Convert User object to JSON if exists
+      'user': user?.toJson(), // Nullable: include only if not null
+      'officer': officer?.toJson(), // Nullable: include only if not null
       'office': office,
       'date': date,
       'time': time,
